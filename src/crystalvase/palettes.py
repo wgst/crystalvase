@@ -90,15 +90,19 @@ _VMD = {
 vmd_colors = _from_symbol_table(_VMD, jmol_colors)
 
 
-def adjust(palette, sat=1.0, bright=1.0, mix_white=0.0):
-    """Return a tone-adjusted copy of ``palette``: optionally mix towards white
-    (``mix_white`` in 0..1, pastelises), then scale HSV saturation and value.
-    Element identity stays recognisable — only the tone changes."""
+def adjust(palette, sat=1.0, bright=1.0, mix_white=0.0, hue=0.0):
+    """Return an adjusted copy of ``palette``: optionally mix towards white
+    (``mix_white`` in 0..1, pastelises), rotate all hues by ``hue`` degrees
+    (a genuinely different colour scheme — element distinctions are kept but
+    conventional colours like red oxygen change), then scale HSV saturation
+    and value."""
     import matplotlib.colors as mcolors
     arr = np.clip(np.asarray(get_palette(palette), dtype=float).copy(), 0, 1)
     if mix_white:
         arr = arr * (1.0 - mix_white) + mix_white
     hsv = mcolors.rgb_to_hsv(arr)
+    if hue:
+        hsv[:, 0] = (hsv[:, 0] + hue / 360.0) % 1.0
     hsv[:, 1] = np.clip(hsv[:, 1] * sat, 0, 1)
     hsv[:, 2] = np.clip(hsv[:, 2] * bright, 0, 1)
     return mcolors.hsv_to_rgb(hsv)

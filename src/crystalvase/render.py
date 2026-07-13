@@ -113,7 +113,7 @@ def _sphere_patches(cx, cy, r, color, dim, z0, S, ramp, white):
     return base, pc
 
 
-def _draw_cell(cell, R, ax, pos_offset):
+def _draw_cell(cell, R, ax, pos_offset, color="0.55", lw=0.6):
     corners = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
                         [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]], float)
     pts = (corners @ cell) @ R - pos_offset
@@ -121,7 +121,7 @@ def _draw_cell(cell, R, ax, pos_offset):
              (2, 6), (3, 5), (3, 6), (4, 7), (5, 7), (6, 7)]
     for a, b in edges:
         ax.plot([pts[a, 0], pts[b, 0]], [pts[a, 1], pts[b, 1]],
-                color="0.55", lw=0.6, zorder=1)
+                color=color, lw=lw, zorder=1)
     return pts
 
 
@@ -189,7 +189,8 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
 
     cell_pts = None
     if show_cell and atoms.cell.rank == 3:
-        cell_pts = _draw_cell(atoms.cell[:], R, ax, pos_offset=center)
+        cell_pts = _draw_cell(atoms.cell[:], R, ax, pos_offset=center,
+                              color=S["cell_color"], lw=S["cell_lw"])
 
     for zi, i in enumerate(np.argsort(z)):          # back to front
         col = colors[i]

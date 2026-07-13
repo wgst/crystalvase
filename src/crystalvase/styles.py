@@ -1,8 +1,10 @@
 """Shade styles: how a sphere is lit and toned. Element colours come from the
 palette; styles only change shading/tone (plus optional HSV ``sat``/``bright``).
 
-Three families, each with variants (pick with ``style="<name>"``):
+Main styles, each with variants (pick with ``style="<name>"``):
 
+- ``clean``     — bright matte spheres, no outline, black cell box: the classic
+                  MD-snapshot look (e.g. water-box figures).
 - ``cartoon``   — simple artistic 3D: flat "sticker" discs shaded only near the
                   edge, outlined. Variants: ``cartoon-dot`` (adds a gloss dot),
                   ``cartoon-soft`` (smooth matte pastel, colour-derived rim).
@@ -36,12 +38,15 @@ Build your own with :func:`make_style`, overriding keys of :data:`DEFAULT_STYLE`
 #   outline      None, or multiplier -> rim colour = atom colour * outline
 #   outline_color explicit RGB outline (e.g. black); overrides ``outline``
 #   outline_lw   rim line width in points
+#   cell_color   colour of the unit-cell wireframe
+#   cell_lw      line width of the unit-cell wireframe
 DEFAULT_STYLE = dict(
     edge_dark=0.70, body0=0.80, body_gain=0.34, body_end=0.80,
     soft_amt=0.40, soft_start=0.42, hot_amt=0.88, hot_start=0.88,
     spec=(1.0, 1.0, 1.0), hx=-0.28, hy=0.30, depth_lo=0.55, depth_desat=0.0,
     sat=1.0, bright=1.0, shadow_tint=(1.0, 1.0, 1.0), shadow_hue=0.0,
     posterize=None, flat=False, outline=None, outline_color=None, outline_lw=0.4,
+    cell_color="0.55", cell_lw=0.6,
 )
 
 
@@ -57,8 +62,8 @@ def make_style(**overrides):
 
 # family bases (numbers shared by the variants)
 _STICKER = dict(                       # flat like ASE, but shaded near the edge -> 3D
-    edge_dark=0.42, body0=0.52, body_gain=0.48, body_end=0.28,
-    soft_amt=0.0, hot_amt=0.0, shadow_tint=(0.90, 0.89, 1.0),
+    edge_dark=0.60, body0=0.68, body_gain=0.32, body_end=0.55,
+    soft_amt=0.0, hot_amt=0.0, shadow_tint=(0.95, 0.94, 1.0),
     hx=-0.12, hy=0.14, depth_lo=0.55, depth_desat=0.25,
     outline_color=(0, 0, 0), outline_lw=1.0, sat=1.02, bright=1.04,
 )
@@ -70,6 +75,12 @@ _REAL = dict(
 )
 
 STYLES = {
+    # -- clean: bright matte spheres, no outline, black cell box (MD-snapshot look) --
+    "clean":          make_style(edge_dark=0.74, body0=0.86, body_gain=0.16, body_end=0.70,
+                                 soft_amt=0.15, soft_start=0.50, hot_amt=0.0,
+                                 hx=-0.16, hy=0.24, depth_lo=0.72, depth_desat=0.10,
+                                 sat=1.05, bright=1.02,
+                                 cell_color=(0.0, 0.0, 0.0), cell_lw=1.1),
     # -- cartoon: flat "sticker" discs with an edge gradient (ASE-like but 3D) --
     "cartoon":        make_style(**_STICKER),                                # + black outline
     "cartoon-dot":    make_style(**{**_STICKER, "hot_amt": 0.85, "hot_start": 0.88,
