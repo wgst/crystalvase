@@ -105,7 +105,7 @@ def main():
     # box (realistic, jmol/xlarge) plus three crystals from docs/demo/ (default
     # palette/size). Saved as a high-res PNG (README) and a true-vector PDF.
     demo = [read(f) for f in sorted(glob.glob(f"{HERE}/demo/*.xyz"))]
-    demo_styles = ["clean", "cartoon-dot", "cartoon-soft"]
+    demo_styles = ["clean", "ase", "cartoon-soft"]
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))
     cv.render(wb, axes.flat[0], style="realistic", palette=WPAL, radius_scale=WSIZE,
               rotation=WROT, rings=140)
