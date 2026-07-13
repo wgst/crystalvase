@@ -21,12 +21,11 @@ dependencies = [
     "ase>=3.22",
     "numpy",
     "matplotlib>=3.5",
+    "pillow",           # JPEG/TIFF/WebP output
 ]
 
 [project.optional-dependencies]
-vesta = ["pymatgen", "pyyaml"]   # for the VESTA colour palette
-raster = ["pillow"]              # for JPEG/TIFF/WebP output
-dev = ["pytest", "pymatgen", "pyyaml", "pillow"]
+dev = ["pytest"]
 
 [project.scripts]
 crystalvase = "crystalvase.cli:main"

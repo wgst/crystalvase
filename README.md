@@ -14,7 +14,7 @@ matplotlib.
 ## Install
 
 ```bash
-pip install -e .              # core; add [vesta] for the VESTA palette, [raster] for JPG/TIFF
+pip install -e .              # everything included; deps: ase, numpy, matplotlib, pillow
 ```
 
 ## Use
