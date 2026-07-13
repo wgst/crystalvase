@@ -132,11 +132,15 @@ PALETTES.update(
     deep=adjust(jmol_colors, sat=1.15, bright=0.80),         # rich darker jewel tones
 )
 
-#: Elements whose HUE is kept at its jmol value by :func:`retone` (so their
-#: strong colour convention survives the scheme's hue rotation — most importantly
-#: oxygen stays red rather than drifting toward gold). Saturation/value still
-#: follow the scheme.
-HUE_ANCHORS = ("O",)
+#: Elements whose conventional colour is protected by :func:`retone`: their HUE
+#: is kept at its jmol value through the scheme's hue rotation (so O stays red,
+#: N blue, S yellow), and they keep more of their saturation (see
+#: :data:`ANCHOR_SAT_KEEP`) so they read as strong, recognisable colours.
+HUE_ANCHORS = ("O", "N", "S")
+#: Fraction of the saturation pull applied to anchored elements (0 = keep their
+#: original saturation fully, 1 = desaturate like everything else). Lower = the
+#: anchored colours (e.g. oxygen red) stay more vivid.
+ANCHOR_SAT_KEEP = 0.45
 
 
 def retone(palette, hue=0.0, sat=None, value=None, pull=0.85, anchor=HUE_ANCHORS):
@@ -145,9 +149,10 @@ def retone(palette, hue=0.0, sat=None, value=None, pull=0.85, anchor=HUE_ANCHORS
     (0..1) with strength ``pull``. Neutral elements (white H, grey C, silvery
     metals) are left untouched.
 
-    ``anchor`` is a list of element symbols whose hue is NOT rotated — their
-    conventional colour is preserved (default: oxygen, so it stays red). Their
-    saturation/value still follow the scheme.
+    ``anchor`` is a list of element symbols whose conventional colour is
+    protected: their hue is NOT rotated and their saturation is pulled only
+    ``ANCHOR_SAT_KEEP`` as hard, so they stay strong and recognisable (default:
+    O red, N blue, S yellow). Their value still follows the scheme.
 
     Unlike :func:`adjust` (which multiplies, keeping each colour's character),
     this converges all colours onto a common tone — giving genuinely different
@@ -158,13 +163,15 @@ def retone(palette, hue=0.0, sat=None, value=None, pull=0.85, anchor=HUE_ANCHORS
     # 0 for neutrals -> 1 for clearly coloured elements (smoothstep on saturation)
     w = np.clip((hsv[:, 1] - 0.08) / (0.30 - 0.08), 0, 1)
     w = w * w * (3 - 2 * w)
+    idx = [chemical_symbols.index(s) for s in anchor if s in chemical_symbols]
     if hue:
-        idx = [chemical_symbols.index(s) for s in anchor if s in chemical_symbols]
         kept = hsv[idx, 0].copy()
         hsv[:, 0] = (hsv[:, 0] + hue / 360.0) % 1.0
         hsv[idx, 0] = kept                 # restore anchored elements' hue
     if sat is not None:
-        hsv[:, 1] += (sat - hsv[:, 1]) * pull * w
+        spull = np.full(hsv.shape[0], pull)
+        spull[idx] *= ANCHOR_SAT_KEEP      # anchored elements keep more saturation
+        hsv[:, 1] += (sat - hsv[:, 1]) * spull * w
     if value is not None:
         hsv[:, 2] += (value - hsv[:, 2]) * pull * w
     return mcolors.hsv_to_rgb(np.clip(hsv, 0, 1))
