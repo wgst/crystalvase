@@ -17,9 +17,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 WROT = "8x,-14y,0z"                     # nice view for the water box
 wb, cl = cv.demo.water_box(), cv.demo.cluster()
 
-# styles: every style on the water box (classic jmol red/white, xlarge)
+# styles: every style on the water box (classic jmol red/white, xlarge). Force a
+# uniform grey cell so the panels differ only in shading (clean's own cell is black).
 cv.grid([(wb, dict(style=s, label=s)) for s in cv.STYLES], ncols=3,
         rotation=WROT, palette="jmol", radius_scale="xlarge", rings=160,
+        cell_color="0.55", cell_width=cv.DEFAULT_STYLE["cell_lw"],
         suptitle="styles", save=f"{HERE}/styles.png")
 
 # palettes: every palette on the diverse cluster (default style/size)
