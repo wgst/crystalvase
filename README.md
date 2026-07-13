@@ -3,7 +3,7 @@
 Tool for generating true **vector** figures of [ASE](https://wiki.fysik.dtu.dk/ase/) structures with
 matplotlib — no POV-Ray.
 
-<img src="docs/preview.png" width="360" alt="crystalvase preview">
+<img src="docs/preview.png" width="520" alt="crystalvase preview">
 
 *(the very same figure as true vector: [docs/preview.pdf](docs/preview.pdf))*
 

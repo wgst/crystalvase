@@ -6,12 +6,15 @@ crystalvase + ase installed (no external data files).
 """
 import os
 
+import glob
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from ase import Atoms
 from ase.build import molecule
+from ase.io import read
 
 import crystalvase as cv
 
@@ -98,10 +101,17 @@ def main():
           ncol=4, title_fn=lambda s: f"{s}  ({cv.RADIUS_SCALES[s]})",
           path=f"{HERE}/sizes.png", suptitle=f"sizes  (palette={WPAL})")
 
-    # hero preview: a clean water render, saved as a high-res PNG (inline in the
-    # README) and a true-vector PDF (zoomable)
-    fig, ax = plt.subplots(figsize=(5, 5))
-    cv.render(wb, ax, palette=WPAL, radius_scale=WSIZE, rotation=WROT)
+    # hero preview: a 2x2 showcase — the water box (jmol/xlarge) plus three
+    # crystals from docs/demo/ rendered with the package defaults. Saved as a
+    # high-res PNG (inline in the README) and a true-vector PDF (zoomable).
+    demo = [read(f) for f in sorted(glob.glob(f"{HERE}/demo/*.xyz"))]
+    fig, axes = plt.subplots(2, 2, figsize=(8, 8))
+    cv.render(wb, axes.flat[0], palette=WPAL, radius_scale=WSIZE, rotation=WROT,
+              rings=140)
+    for ax, atoms in zip(axes.flat[1:], demo):
+        cv.render(atoms, ax, reduce_cell=True, rings=140)      # package defaults
+    for ax in axes.flat[1 + len(demo):]:
+        ax.set_axis_off()
     fig.savefig(f"{HERE}/preview.png", bbox_inches="tight", dpi=200)
     fig.savefig(f"{HERE}/preview.pdf", bbox_inches="tight")
     plt.close(fig)
