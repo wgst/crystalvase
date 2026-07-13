@@ -22,7 +22,12 @@ import crystalvase as cv
 atoms = read("POSCAR")
 cv.write(atoms, "struct.pdf")                                 # defaults (below)
 cv.write(atoms, "struct.jpg", rotation="45x,10y,0z", style="cartoon", dpi=300)
+cv.write(atoms, "labelled.pdf", label="formula")             # formula below the figure
 cv.render(atoms, ax)                                          # or draw onto your own Axes
+
+# several structures in one figure (per-panel overrides), saved to png + pdf
+cv.grid([(a1, dict(style="clean")), (a2, dict(palette="emerald"))],
+        ncols=2, label="formula", save=["fig.png", "fig.pdf"])
 ```
 
 ```bash

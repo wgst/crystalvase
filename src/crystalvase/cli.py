@@ -69,6 +69,7 @@ def build_parser():
                    help="label boldness: normal | bold | 'extra bold' | black")
     p.add_argument("--label-rotation", type=float, default=0,
                    help="label orientation in degrees (0 = horizontal)")
+    p.add_argument("--label-font", default=None, help="label font family")
     p.add_argument("--list-palettes", action="store_true", help="list palettes and exit")
     p.add_argument("--list-styles", action="store_true", help="list shade styles and exit")
     p.add_argument("--version", action="version", version=f"crystalvase {__version__}")
@@ -102,7 +103,8 @@ def main(argv=None):
               reduce_cell=args.reduce_cell, rings=args.rings, cell_color=args.cell_color,
               cell_width=args.cell_width, label=args.label, label_size=args.label_size,
               label_weight=args.label_weight, label_rotation=args.label_rotation,
-              figsize=args.figsize, dpi=args.dpi, background=args.background, title=title)
+              label_font=args.label_font, figsize=args.figsize, dpi=args.dpi,
+              background=args.background, title=title)
         print("wrote", out)
     return 0
 

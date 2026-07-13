@@ -41,6 +41,21 @@ def _resolve_radius_scale(rs):
 NR = 220
 
 
+def _pick_label_font():
+    """Prefer a clean Helvetica-like face over matplotlib's default DejaVu Sans."""
+    from matplotlib import font_manager as fm
+    have = {f.name for f in fm.fontManager.ttflist}
+    for name in ("Helvetica", "Arial", "Liberation Sans", "TeX Gyre Heros",
+                 "Nimbus Sans", "DejaVu Sans"):
+        if name in have:
+            return name
+    return "sans-serif"
+
+
+#: Font used for the optional label (a clean sans available on this system).
+DEFAULT_LABEL_FONT = _pick_label_font()
+
+
 def _ring_ts(nr):
     """Ring shrink factors: just inside the rim -> focal point."""
     return np.linspace(0.985, 0.0, nr)
@@ -175,7 +190,8 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
            style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE,
            show_cell=True, reduce_cell=False, rings=None,
            cell_color=None, cell_width=None,
-           label=None, label_size=13, label_weight="extra bold", label_rotation=0):
+           label=None, label_size=13, label_weight="extra bold", label_rotation=0,
+           label_font=None):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
     Parameters
@@ -219,6 +235,9 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         ``"black"`` or a number 0-1000.
     label_rotation : float
         Label orientation in degrees (0 = horizontal, default).
+    label_font : str, optional
+        Label font family (default: a clean sans available on the system, see
+        :data:`DEFAULT_LABEL_FONT`).
     """
     palette = get_palette(palette)
     S = get_style(style)
@@ -293,5 +312,6 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         if label == "formula":
             label = atoms.get_chemical_formula()
         ax.text(0.5, -0.02, label, transform=ax.transAxes, ha="center", va="top",
-                fontsize=label_size, fontweight=label_weight, rotation=label_rotation)
+                fontsize=label_size, fontweight=label_weight, rotation=label_rotation,
+                fontfamily=label_font or DEFAULT_LABEL_FONT)
     return ax
