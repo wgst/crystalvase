@@ -160,7 +160,7 @@ def retone(palette, hue=0.0, sat=None, value=None, pull=0.85):
 # converge onto the scheme's tone — like the many named variants of "green"
 # (forest, mint, emerald, olive, neon, sage, ...) applied palette-wide
 PALETTES.update(
-    forest=retone(jmol_colors, hue=-8, sat=0.80, value=0.45),      # deep & full
+    forest=retone(jmol_colors, hue=-8, sat=0.80, value=0.55),      # deep & full
     wine=retone(jmol_colors, hue=-14, sat=0.65, value=0.55),        # muted vintage
     emerald=retone(jmol_colors, hue=-6, sat=0.95, value=0.72),      # jewel tones
     olive=retone(jmol_colors, hue=+22, sat=0.55, value=0.62),       # warm earthy
@@ -169,5 +169,5 @@ PALETTES.update(
     tropical=retone(jmol_colors, hue=-20, sat=0.90, value=0.95),    # bright, cyan-leaning
     neon=retone(jmol_colors, hue=-4, sat=1.0, value=1.0, pull=0.95),      # electric
     sage=retone(jmol_colors, hue=-4, sat=0.30, value=0.78, pull=0.9),     # dusty greyed
-    midnight=retone(jmol_colors, hue=-10, sat=0.75, value=0.32),    # very dark, moody
+    midnight=retone(jmol_colors, hue=-16, sat=0.85, value=0.40),    # dark, cool, moody
 )
