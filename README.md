@@ -35,7 +35,9 @@ Format is taken from the extension. Main options (API kwargs = CLI flags): `rota
 (ASE `"<a>x,<b>y,<c>z"` syntax), `palette`, `style`, `radius_scale` (`"small"` /
 `"medium"` / `"large"` / `"xlarge"` or a number), `show_cell`, `reduce_cell`, `rings`
 (gradient rings per sphere, default 220 — fewer gives much smaller vector files, e.g.
-`rings=40` for many-panel figures), plus `figsize`/`dpi`/`background` for saving.
+`rings=40` for many-panel figures), `cell_color` / `cell_width` (unit-cell wireframe —
+any matplotlib colour: `black`, `lightgray`, `dimgray`, `"0.3"`, `#444`, …), plus
+`figsize`/`dpi`/`background` for saving.
 
 ## Palettes & styles
 

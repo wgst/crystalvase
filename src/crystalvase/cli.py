@@ -45,6 +45,11 @@ def build_parser():
                    help="atom size: small | medium | large | xlarge, or a number "
                         f"(fraction of covalent radius; default: {DEFAULT_RADIUS_SCALE})")
     p.add_argument("--no-cell", action="store_true", help="do not draw the unit cell")
+    p.add_argument("--cell-color", default=None,
+                   help="unit-cell colour, e.g. black | lightgray | dimgray | '0.3' | "
+                        "'#444' (default: from the style)")
+    p.add_argument("--cell-width", type=float, default=None,
+                   help="unit-cell line width (default: from the style)")
     p.add_argument("--reduce-cell", action="store_true",
                    help="Niggli-reduce the cell so oblique boxes aren't sheared")
     p.add_argument("--rings", type=int, default=None,
@@ -87,8 +92,9 @@ def main(argv=None):
         title = atoms.get_chemical_formula() if args.title == "formula" else args.title
         write(atoms, out, rotation=args.rotation, palette=args.palette, style=args.style,
               radius_scale=args.radius_scale, show_cell=not args.no_cell,
-              reduce_cell=args.reduce_cell, rings=args.rings, figsize=args.figsize,
-              dpi=args.dpi, background=args.background, title=title)
+              reduce_cell=args.reduce_cell, rings=args.rings, cell_color=args.cell_color,
+              cell_width=args.cell_width, figsize=args.figsize, dpi=args.dpi,
+              background=args.background, title=title)
         print("wrote", out)
     return 0
 

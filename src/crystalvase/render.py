@@ -173,7 +173,8 @@ def _maybe_reduce(atoms):
 
 def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
            style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE,
-           show_cell=True, reduce_cell=False, rings=None):
+           show_cell=True, reduce_cell=False, rings=None,
+           cell_color=None, cell_width=None):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
     Parameters
@@ -201,6 +202,12 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         Gradient rings per sphere (default :data:`NR` = 220). Fewer rings give
         much smaller vector files at slightly coarser gradients — useful for
         many-panel figures or large systems.
+    cell_color : matplotlib colour, optional
+        Colour of the unit-cell wireframe (e.g. ``"black"``, ``"lightgray"``,
+        ``"dimgray"``, ``"0.3"``, a hex string or RGB tuple). Defaults to the
+        style's ``cell_color`` (black for ``clean``, mid-grey otherwise).
+    cell_width : float, optional
+        Line width of the unit-cell wireframe; defaults to the style's value.
     """
     palette = get_palette(palette)
     S = get_style(style)
@@ -241,7 +248,11 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         return 20.0 + (zv - zlo) / zspan * 200.0
 
     if cell_pts is not None:
-        _draw_cell(cell_pts, ax, zof, color=S["cell_color"], lw=S["cell_lw"])
+        ccolor = S["cell_color"] if cell_color is None else cell_color
+        clw = S["cell_lw"] if cell_width is None else cell_width
+        if not mcolors.is_color_like(ccolor):
+            raise ValueError(f"cell_color {ccolor!r} is not a valid matplotlib colour")
+        _draw_cell(cell_pts, ax, zof, color=ccolor, lw=clw)
 
     for i in np.argsort(z):          # back to front (insertion order breaks zorder ties)
         col = colors[i]
