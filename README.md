@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" width="200" alt="crystalvase logo">
+</p>
+
 # crystalvase
 
 Tool for generating true **vector** figures of [ASE](https://wiki.fysik.dtu.dk/ase/) structures with
