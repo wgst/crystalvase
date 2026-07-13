@@ -7,7 +7,7 @@ Load a structure with ASE, then draw or save it::
 
     atoms = read("POSCAR")
     cv.write(atoms, "struct.pdf")                       # vector, default view
-    cv.write(atoms, "struct.jpg", rotation="45x,10y,0z", style="05_vivid")
+    cv.write(atoms, "struct.jpg", rotation="45x,10y,0z", style="cartoon")
 
     ax = cv.render(atoms)                                # draw onto a matplotlib Axes
 

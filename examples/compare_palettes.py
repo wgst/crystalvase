@@ -18,7 +18,7 @@ def main():
     p.add_argument("input")
     p.add_argument("output")
     p.add_argument("--index", type=int, default=0)
-    p.add_argument("--style", default="01_glossy")
+    p.add_argument("--style", default="realistic")
     p.add_argument("--reduce-cell", action="store_true")
     args = p.parse_args()
 

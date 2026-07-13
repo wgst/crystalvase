@@ -18,7 +18,7 @@ def main():
     p.add_argument("--stride", type=int, default=1, help="take every Nth frame")
     p.add_argument("--limit", type=int, default=None, help="max number of frames")
     p.add_argument("--palette", default="jmol")
-    p.add_argument("--style", default="01_glossy")
+    p.add_argument("--style", default="realistic")
     p.add_argument("--ext", default="pdf", help="output extension (pdf, svg, png, jpg, ...)")
     p.add_argument("--reduce-cell", action="store_true",
                    help="Niggli-reduce oblique cells so boxes aren't sheared")

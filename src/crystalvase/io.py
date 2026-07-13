@@ -14,7 +14,7 @@ _NO_ALPHA = {".jpg", ".jpeg", ".bmp"}      # formats without transparency
 
 
 def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette="jmol",
-          style="01_glossy", radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
+          style="realistic", radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
           reduce_cell=False, figsize=4.0, dpi=200, transparent=True,
           background=None, title=None):
     """Render ``atoms`` and save to ``filename`` (format from the extension).

@@ -1,30 +1,46 @@
-"""Shade styles: how a sphere is lit and toned. Colours themselves come from the
-palette and are unchanged (except optional HSV ``sat``/``bright`` tweaks).
+"""Shade styles: how a sphere is lit and toned. Element colours come from the
+palette; styles only change shading/tone (plus optional HSV ``sat``/``bright``).
 
-A style is a plain dict; :data:`STYLES` holds 10 named presets. Build your own with
-:func:`make_style` overriding any of the keys documented in :data:`DEFAULT_STYLE`.
+Three families, each with variants (pick with ``style="<name>"``):
+
+- ``cartoon``   — simple artistic 3D: cel-shaded bands, tinted shadows, no gloss.
+                  Variants: ``cartoon-warm``, ``cartoon-shift``, ``cartoon-soft``.
+- ``realistic`` — studio-lit glossy spheres with deep shading (default).
+                  Variants: ``realistic-warm``, ``realistic-cool``.
+- ``ase``       — the classic flat ASE look (outlined discs), vector and
+                  depth-dimmed. Variant: ``ase-shaded``.
+
+All styles shade atoms by depth (position) so overlapping structure stays clear.
+Build your own with :func:`make_style`, overriding keys of :data:`DEFAULT_STYLE`.
 """
 
-# All knobs, with the "01_glossy" default values:
-#   edge_dark   shadow-floor multiplier for the silhouette disk
-#   body0       diffuse body brightness at the shadow edge
-#   body_gain   extra brightness added towards the lit side
-#   body_end    where the diffuse ramp saturates (0..1 across the radius)
-#   soft_amt    strength of the broad sheen
-#   soft_start  where the broad sheen begins (0..1)
-#   hot_amt     strength of the tight specular hotspot (gloss)
-#   hot_start   where the hotspot begins (0..1; higher = tighter)
-#   spec        specular colour (tuple, RGB 0-1); tint for warm/cool looks
-#   hx, hy      light direction: highlight offset as a fraction of the radius
-#   depth_lo    brightness of the furthest-back atom (front atoms = 1.0)
-#   sat, bright HSV saturation / value multipliers applied to the base colour
-#   outline     None, or a multiplier -> rim = base colour * outline (a soft edge)
-#   outline_lw  rim line width in points
+# All knobs:
+#   edge_dark    shadow-floor multiplier for the silhouette disk (limb darkness)
+#   body0        diffuse body brightness at the shadow edge
+#   body_gain    extra brightness added towards the lit side
+#   body_end     where the diffuse ramp saturates (0..1 across the radius)
+#   soft_amt     strength of the broad sheen
+#   soft_start   where the broad sheen begins (0..1)
+#   hot_amt      strength of the tight specular hotspot (gloss)
+#   hot_start    where the hotspot begins (0..1; higher = tighter)
+#   spec         specular colour (RGB 0-1); tints the light (warm/cool)
+#   hx, hy       light direction: highlight offset as a fraction of the radius
+#   depth_lo     brightness of the furthest-back atom (front atoms = 1.0)
+#   depth_desat  extra desaturation of back atoms (0..1); atmospheric depth cue
+#   sat, bright  HSV saturation / value multipliers applied to the base colour
+#   shadow_tint  RGB multiplier at the shadow end — the hue shadows lean towards
+#   shadow_hue   extra hue rotation of the shadow end, in degrees
+#   posterize    None, or int N -> cel shading with N discrete bands
+#   flat         True -> single flat disc (no gradient); the ASE look
+#   outline      None, or multiplier -> rim colour = atom colour * outline
+#   outline_color explicit RGB outline (e.g. black); overrides ``outline``
+#   outline_lw   rim line width in points
 DEFAULT_STYLE = dict(
     edge_dark=0.70, body0=0.80, body_gain=0.34, body_end=0.80,
     soft_amt=0.40, soft_start=0.42, hot_amt=0.88, hot_start=0.88,
-    spec=(1.0, 1.0, 1.0), hx=-0.28, hy=0.30, depth_lo=0.55,
-    sat=1.0, bright=1.0, outline=None, outline_lw=0.4,
+    spec=(1.0, 1.0, 1.0), hx=-0.28, hy=0.30, depth_lo=0.55, depth_desat=0.0,
+    sat=1.0, bright=1.0, shadow_tint=(1.0, 1.0, 1.0), shadow_hue=0.0,
+    posterize=None, flat=False, outline=None, outline_color=None, outline_lw=0.4,
 )
 
 
@@ -38,26 +54,47 @@ def make_style(**overrides):
     return s
 
 
+# family bases (numbers shared by the variants)
+_TOON = dict(
+    posterize=3, edge_dark=0.55, body0=0.70, body_gain=0.40, body_end=0.95,
+    soft_amt=0.0, hot_amt=0.45, hot_start=0.90, spec=(1.0, 0.97, 0.86),
+    depth_lo=0.55, depth_desat=0.45, outline=0.35, outline_lw=1.1,
+    sat=1.08, bright=1.06, hx=-0.26, hy=0.28,
+)
+_REAL = dict(
+    edge_dark=0.40, body0=0.54, body_gain=0.52, body_end=0.92,
+    soft_amt=0.30, soft_start=0.30, hot_amt=0.95, hot_start=0.84,
+    spec=(1.0, 0.98, 0.95), shadow_tint=(0.88, 0.90, 1.04),
+    depth_lo=0.42, depth_desat=0.15, sat=1.02, hx=-0.30, hy=0.34,
+)
+
 STYLES = {
-    "01_glossy":        make_style(),
-    "02_soft_rim":      make_style(outline=0.62, outline_lw=0.3),
-    "03_matte":         make_style(edge_dark=0.82, body0=0.86, body_gain=0.18, body_end=0.9,
-                                   soft_amt=0.22, soft_start=0.35, hot_amt=0.0),
-    "04_high_contrast": make_style(edge_dark=0.50, body0=0.74, body_gain=0.40,
-                                   hot_amt=0.95, hot_start=0.90, depth_lo=0.40),
-    "05_vivid":         make_style(sat=1.40, bright=1.02, edge_dark=0.66),
-    "06_pastel":        make_style(sat=0.52, bright=1.18, edge_dark=0.86,
-                                   hot_amt=0.55, hot_start=0.90, soft_amt=0.30),
-    "07_cel_flat":      make_style(body0=0.90, body_gain=0.12, body_end=0.6,
-                                   soft_amt=0.08, soft_start=0.5, hot_amt=0.70,
-                                   hot_start=0.90, edge_dark=0.75, outline=0.40, outline_lw=0.7),
-    "08_metallic":      make_style(sat=0.85, bright=0.97, edge_dark=0.52,
-                                   hot_amt=1.0, hot_start=0.80, soft_amt=0.35,
-                                   spec=(0.90, 0.94, 1.0)),
-    "09_warm":          make_style(sat=1.12, bright=1.03, spec=(1.0, 0.92, 0.80),
-                                   edge_dark=0.68),
-    "10_cool":          make_style(sat=1.06, spec=(0.84, 0.92, 1.0), edge_dark=0.66,
-                                   hot_amt=0.90),
+    # -- cartoon: simple artistic 3D, cel bands, tinted shadows, no high gloss --
+    "cartoon":        make_style(**_TOON, shadow_tint=(0.62, 0.58, 1.04)),   # violet shadows
+    "cartoon-warm":   make_style(**{**_TOON, "spec": (1.0, 0.99, 0.92)},
+                                 shadow_tint=(1.06, 0.66, 0.45)),            # amber shadows
+    "cartoon-shift":  make_style(**_TOON, shadow_hue=45.0,
+                                 shadow_tint=(0.74, 0.72, 0.94)),            # hue-rotated shadows
+    "cartoon-soft":   make_style(edge_dark=0.72, body0=0.80, body_gain=0.28, body_end=0.90,
+                                 soft_amt=0.16, soft_start=0.40, hot_amt=0.0,
+                                 shadow_tint=(0.78, 0.75, 1.02), sat=0.88, bright=1.10,
+                                 outline=0.50, outline_lw=0.7,
+                                 depth_lo=0.55, depth_desat=0.40),           # smooth matte pastel
+    # -- realistic: studio-lit glossy spheres --
+    "realistic":      make_style(**_REAL),                                   # neutral studio light
+    "realistic-warm": make_style(**{**_REAL, "spec": (1.0, 0.92, 0.78),      # warm key light
+                                    "shadow_tint": (0.86, 0.88, 1.08),
+                                    "sat": 1.06, "bright": 1.01}),
+    "realistic-cool": make_style(**{**_REAL, "spec": (0.85, 0.93, 1.0),      # cool daylight
+                                    "shadow_tint": (0.93, 0.93, 1.0),
+                                    "bright": 0.99}),
+    # -- ase: the classic flat ASE look, vector + depth-dimmed --
+    "ase":            make_style(flat=True, body0=1.0, outline_color=(0, 0, 0),
+                                 outline_lw=1.0, depth_lo=0.55),
+    "ase-shaded":     make_style(edge_dark=0.80, body0=0.88, body_gain=0.16, body_end=0.85,
+                                 soft_amt=0.12, soft_start=0.40, hot_amt=0.35, hot_start=0.92,
+                                 outline_color=(0, 0, 0), outline_lw=0.8,
+                                 depth_lo=0.50, depth_desat=0.15),
 }
 
 

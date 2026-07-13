@@ -3,6 +3,7 @@ holds, and vector PDFs contain no rasterised image XObjects.
 """
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 import numpy as np
 import pytest
@@ -13,9 +14,16 @@ import crystalvase as cv
 
 def test_palettes_and_styles_present():
     assert set(cv.PALETTES) == {"jmol", "vesta", "vmd"}
-    assert len(cv.STYLES) == 10
+    assert {"cartoon", "realistic", "ase"} <= set(cv.STYLES)
     for arr in cv.PALETTES.values():
         assert arr.ndim == 2 and arr.shape[1] == 3
+
+
+def test_render_each_family():
+    for name in ("cartoon", "realistic", "ase"):
+        ax = cv.render(molecule("H2O"), style=name, show_cell=False)
+        assert ax is not None
+        plt.close(ax.figure)
 
 
 def test_render_returns_axes():
@@ -25,7 +33,7 @@ def test_render_returns_axes():
 
 def test_write_pdf_is_vector(tmp_path):
     out = tmp_path / "si.pdf"
-    cv.write(bulk("NaCl", "rocksalt", a=5.64), str(out), style="04_high_contrast")
+    cv.write(bulk("NaCl", "rocksalt", a=5.64), str(out), style="realistic")
     data = out.read_bytes()
     assert data[:4] == b"%PDF"
     assert data.count(b"/Subtype /Image") == 0     # no rasterised atoms

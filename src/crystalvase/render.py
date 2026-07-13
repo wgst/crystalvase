@@ -30,11 +30,16 @@ def _smoothstep(x, a, b):
 
 
 def _curves(S):
-    mult = S["body0"] + S["body_gain"] * _smoothstep(_u, 0.0, S["body_end"])
-    soft = _smoothstep(_u, S["soft_start"], 1.0) * S["soft_amt"]
-    hot = _smoothstep(_u, S["hot_start"], 1.0) * S["hot_amt"]
+    """Per-ring diffuse ramp (0..1) and specular blend, honouring ``posterize``."""
+    u = _u
+    if S["posterize"]:
+        n = max(int(S["posterize"]), 2)          # cel shading: quantise into n bands
+        u = np.minimum(np.floor(u * n) / (n - 1), 1.0)
+    ramp = _smoothstep(u, 0.0, S["body_end"])
+    soft = _smoothstep(u, S["soft_start"], 1.0) * S["soft_amt"]
+    hot = _smoothstep(u, S["hot_start"], 1.0) * S["hot_amt"]
     white = np.clip(soft + hot, 0.0, 0.97)
-    return mult, white
+    return ramp, white
 
 
 def _tone(colors, S):
@@ -46,28 +51,64 @@ def _tone(colors, S):
     return mcolors.hsv_to_rgb(hsv)
 
 
-def _sphere_patches(cx, cy, r, color, dim, z0, S, mult, white):
-    """Return (base disk, PatchCollection of rings) approximating a lit sphere."""
+def _hue_shift(rgb, deg):
+    if not deg:
+        return np.asarray(rgb, float)
+    hsv = mcolors.rgb_to_hsv(np.clip(np.asarray(rgb, float), 0, 1))
+    hsv[0] = (hsv[0] + deg / 360.0) % 1.0
+    return mcolors.hsv_to_rgb(hsv)
+
+
+def _desaturate(rgb, amount):
+    if amount <= 0:
+        return rgb
+    hsv = mcolors.rgb_to_hsv(np.clip(rgb, 0, 1))
+    hsv[1] *= 1.0 - min(amount, 1.0)
+    return mcolors.hsv_to_rgb(hsv)
+
+
+def _outline_color(S, color, dim):
+    if S["outline_color"] is not None:              # explicit rim (e.g. ASE black)
+        return S["outline_color"]
+    if S["outline"] is not None:                    # darkened-own-colour rim
+        return np.clip(color * S["outline"] * dim, 0, 1)
+    return "none"
+
+
+def _sphere_patches(cx, cy, r, color, dim, z0, S, ramp, white):
+    """Return (base disk, PatchCollection of rings | None) for one atom."""
     color = np.asarray(color)
+    ec = _outline_color(S, color, dim)
+
+    if S["flat"]:                                   # single outlined disc (ASE look)
+        base = Circle((cx, cy), r, facecolor=np.clip(color * S["body0"] * dim, 0, 1),
+                      edgecolor=ec, linewidth=S["outline_lw"], antialiased=True,
+                      zorder=z0)
+        return base, None
+
+    # shadow-end colour may lean towards a hue (tint and/or rotation)
+    shadow = _hue_shift(color, S["shadow_hue"]) * np.asarray(S["shadow_tint"])
+    dark = shadow * S["body0"]
+    lit = color * (S["body0"] + S["body_gain"])
     spec = np.asarray(S["spec"])
     fx, fy = cx + S["hx"] * r, cy + S["hy"] * r
 
-    ec = "none"
-    if S["outline"] is not None:                    # optional darkened-own-colour rim
-        ec = np.clip(color * S["outline"] * dim, 0, 1)
-    base = Circle((cx, cy), r, facecolor=np.clip(color * S["edge_dark"] * dim, 0, 1),
+    base = Circle((cx, cy), r, facecolor=np.clip(shadow * S["edge_dark"] * dim, 0, 1),
                   edgecolor=ec, linewidth=S["outline_lw"], antialiased=True, zorder=z0)
 
     circles, facecolors = [], []
     for k in range(NR):
         t = _t[k]
-        rgb = np.clip((color * mult[k]) * (1 - white[k]) + spec * white[k], 0, 1) * dim
+        body = np.clip(dark + (lit - dark) * ramp[k], 0, 1)
+        rgb = np.clip(body * (1 - white[k]) + spec * white[k], 0, 1) * dim
         circles.append(Circle((cx * t + fx * (1 - t), cy * t + fy * (1 - t)), r * t))
         facecolors.append(rgb)
     pc = PatchCollection(circles, match_original=False)
     pc.set_facecolor(facecolors)
     pc.set_edgecolor("none")
-    pc.set_antialiased(False)     # no inter-ring AA seams -> smooth gradient
+    # smooth gradients: AA off so ring edges leave no seams; cel bands: AA on for
+    # clean band boundaries (adjacent same-colour rings blend invisibly anyway)
+    pc.set_antialiased(bool(S["posterize"]))
     pc.set_zorder(z0)
     return base, pc
 
@@ -99,7 +140,7 @@ def _maybe_reduce(atoms):
 
 
 def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
-           style="01_glossy", radius_scale=DEFAULT_RADIUS_SCALE,
+           style="realistic", radius_scale=DEFAULT_RADIUS_SCALE,
            show_cell=True, reduce_cell=False):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
@@ -113,6 +154,7 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
         Element colours: ``"jmol"`` (ASE default), ``"vesta"``, ``"vmd"``, or an array.
     style : str or dict
         Shade style name (see :data:`crystalvase.styles.STYLES`) or overrides dict.
+        Families: ``cartoon*``, ``realistic*`` (default), ``ase*``.
     radius_scale : float
         Atom radius as a fraction of the covalent radius.
     show_cell : bool
@@ -128,7 +170,7 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     if ax is None:
         _, ax = plt.subplots(figsize=(4, 4))
 
-    mult, white = _curves(S)
+    ramp, white = _curves(S)
     R = rotate(rotation)
     pos = atoms.positions @ R
     center = pos.mean(0)
@@ -138,6 +180,7 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     radii = covalent_radii[atoms.numbers] * radius_scale
     colors = _tone(palette[atoms.numbers].copy(), S)
 
+    # depth cue: back atoms dimmer (and optionally desaturated) so structure is clear
     if len(z) > 1:
         znorm = (z - z.min()) / (np.ptp(z) + 1e-9)
     else:
@@ -149,10 +192,14 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
         cell_pts = _draw_cell(atoms.cell[:], R, ax, pos_offset=center)
 
     for zi, i in enumerate(np.argsort(z)):          # back to front
-        base, pc = _sphere_patches(x[i], y[i], radii[i], colors[i], dim[i],
-                                   10 + 2 * zi, S, mult, white)
+        col = colors[i]
+        if S["depth_desat"]:
+            col = _desaturate(col, S["depth_desat"] * (1.0 - znorm[i]))
+        base, pc = _sphere_patches(x[i], y[i], radii[i], col, dim[i],
+                                   10 + 2 * zi, S, ramp, white)
         ax.add_patch(base)
-        ax.add_collection(pc)
+        if pc is not None:
+            ax.add_collection(pc)
 
     # limits enclose the atoms (with radii) and the whole cell box
     pad = (radii.max() if len(radii) else 1.0) + 0.4

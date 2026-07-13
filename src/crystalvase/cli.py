@@ -37,8 +37,8 @@ def build_parser():
     p.add_argument("--rotation", default=DEFAULT_ROTATION,
                    help=f"view rotation, ASE syntax (default: {DEFAULT_ROTATION!r})")
     p.add_argument("--palette", default="jmol", help="jmol | vesta | vmd (default: jmol)")
-    p.add_argument("--style", default="01_glossy",
-                   help="shade style name (default: 01_glossy)")
+    p.add_argument("--style", default="realistic",
+                   help="shade style name (default: realistic)")
     p.add_argument("--radius-scale", type=float, default=DEFAULT_RADIUS_SCALE,
                    help=f"atom size vs covalent radius (default: {DEFAULT_RADIUS_SCALE})")
     p.add_argument("--no-cell", action="store_true", help="do not draw the unit cell")
