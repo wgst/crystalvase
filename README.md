@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" width="200" alt="crystalvase logo">
+  <img src="https://raw.githubusercontent.com/wgst/crystalvase/main/docs/logo.png" width="200" alt="crystalvase logo">
 </p>
 
 # crystalvase
@@ -7,9 +7,9 @@
 Tool for generating true **vector** figures of [ASE](https://wiki.fysik.dtu.dk/ase/) structures with
 matplotlib.
 
-<img src="docs/preview.png" width="520" alt="crystalvase preview">
+<img src="https://raw.githubusercontent.com/wgst/crystalvase/main/docs/preview.png" width="520" alt="crystalvase preview">
 
-*(the very same figure as true vector: [docs/preview.pdf](docs/preview.pdf))*
+*(the very same figure as true vector: [docs/preview.pdf](https://github.com/wgst/crystalvase/blob/main/docs/preview.pdf))*
 
 ## Install
 
@@ -76,12 +76,12 @@ Pick a `style`, `palette` and `radius_scale` by eye. Regenerate with
 
 **Styles** (water box, `jmol`):
 
-![styles](docs/styles.png)
+![styles](https://raw.githubusercontent.com/wgst/crystalvase/main/docs/styles.png)
 
 **Palettes** (default style):
 
-![palettes](docs/palettes.png)
+![palettes](https://raw.githubusercontent.com/wgst/crystalvase/main/docs/palettes.png)
 
 **Sizes** (`radius_scale`):
 
-![sizes](docs/sizes.png)
+![sizes](https://raw.githubusercontent.com/wgst/crystalvase/main/docs/sizes.png)

@@ -31,7 +31,9 @@ dev = ["pytest"]
 crystalvase = "crystalvase.cli:main"
 
 [project.urls]
-Homepage = "https://example.invalid/crystalvase"
+Homepage = "https://github.com/wgst/crystalvase"
+Repository = "https://github.com/wgst/crystalvase"
+Issues = "https://github.com/wgst/crystalvase/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
