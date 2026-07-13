@@ -18,7 +18,7 @@ DEFAULT_ROTATION = "-6x,-5y,0z"
 #: Named atom-size presets (fraction of the covalent radius).
 RADIUS_SCALES = {"small": 0.65, "medium": 0.85, "large": 1.05, "xlarge": 1.25}
 #: Default atom size: preset name or fraction of the covalent radius.
-DEFAULT_RADIUS_SCALE = "medium"
+DEFAULT_RADIUS_SCALE = "xlarge"
 
 
 def _resolve_radius_scale(rs):
@@ -172,9 +172,9 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
         Shade style name (see :data:`crystalvase.styles.STYLES`) or overrides dict.
         Families: ``cartoon*``, ``realistic*`` (default), ``ase*``.
     radius_scale : str or float
-        Atom size: preset ``"small"`` (0.65), ``"medium"`` (0.85, default),
-        ``"large"`` (1.05), ``"xlarge"`` (1.25), or a fraction of the covalent
-        radius.
+        Atom size: preset ``"small"`` (0.65), ``"medium"`` (0.85),
+        ``"large"`` (1.05), ``"xlarge"`` (1.25, default), or a fraction of the
+        covalent radius.
     show_cell : bool
         Draw the unit-cell wireframe (ignored for non-periodic systems).
     reduce_cell : bool
