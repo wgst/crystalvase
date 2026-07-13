@@ -44,6 +44,9 @@ def build_parser():
     p.add_argument("--no-cell", action="store_true", help="do not draw the unit cell")
     p.add_argument("--reduce-cell", action="store_true",
                    help="Niggli-reduce the cell so oblique boxes aren't sheared")
+    p.add_argument("--rings", type=int, default=None,
+                   help="gradient rings per sphere (default 220; fewer -> smaller "
+                        "vector files)")
     p.add_argument("--figsize", type=float, default=4.0,
                    help="square figure size in inches (default: 4)")
     p.add_argument("--dpi", type=int, default=200, help="raster resolution (default: 200)")
@@ -81,8 +84,8 @@ def main(argv=None):
         title = atoms.get_chemical_formula() if args.title == "formula" else args.title
         write(atoms, out, rotation=args.rotation, palette=args.palette, style=args.style,
               radius_scale=args.radius_scale, show_cell=not args.no_cell,
-              reduce_cell=args.reduce_cell, figsize=args.figsize, dpi=args.dpi,
-              background=args.background, title=title)
+              reduce_cell=args.reduce_cell, rings=args.rings, figsize=args.figsize,
+              dpi=args.dpi, background=args.background, title=title)
         print("wrote", out)
     return 0
 

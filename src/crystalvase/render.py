@@ -17,11 +17,14 @@ from .styles import get_style
 DEFAULT_ROTATION = "-6x,-5y,0z"
 #: Default atom size as a fraction of the covalent radius.
 DEFAULT_RADIUS_SCALE = 0.65
-#: Number of nested circles per sphere (higher = smoother gradient, larger files).
+#: Default number of nested circles per sphere (higher = smoother gradient,
+#: larger vector files). Override per call with ``render(..., rings=N)``.
 NR = 220
 
-_t = np.linspace(0.985, 0.0, NR)     # just inside the rim -> focal point
-_u = 1.0 - _t                        # ~0 at edge, 1 at focal
+
+def _ring_ts(nr):
+    """Ring shrink factors: just inside the rim -> focal point."""
+    return np.linspace(0.985, 0.0, nr)
 
 
 def _smoothstep(x, a, b):
@@ -29,9 +32,8 @@ def _smoothstep(x, a, b):
     return x * x * (3 - 2 * x)
 
 
-def _curves(S):
+def _curves(S, u):
     """Per-ring diffuse ramp (0..1) and specular blend, honouring ``posterize``."""
-    u = _u
     if S["posterize"]:
         n = max(int(S["posterize"]), 2)          # cel shading: quantise into n bands
         u = np.minimum(np.floor(u * n) / (n - 1), 1.0)
@@ -75,7 +77,7 @@ def _outline_color(S, color, dim):
     return "none"
 
 
-def _sphere_patches(cx, cy, r, color, dim, z0, S, ramp, white):
+def _sphere_patches(cx, cy, r, color, dim, z0, S, ts, ramp, white):
     """Return (base disk, PatchCollection of rings | None) for one atom."""
     color = np.asarray(color)
     ec = _outline_color(S, color, dim)
@@ -97,10 +99,9 @@ def _sphere_patches(cx, cy, r, color, dim, z0, S, ramp, white):
                   edgecolor=ec, linewidth=S["outline_lw"], antialiased=True, zorder=z0)
 
     circles, facecolors = [], []
-    for k in range(NR):
-        t = _t[k]
-        body = np.clip(dark + (lit - dark) * ramp[k], 0, 1)
-        rgb = np.clip(body * (1 - white[k]) + spec * white[k], 0, 1) * dim
+    for t, ramp_k, white_k in zip(ts, ramp, white):
+        body = np.clip(dark + (lit - dark) * ramp_k, 0, 1)
+        rgb = np.clip(body * (1 - white_k) + spec * white_k, 0, 1) * dim
         circles.append(Circle((cx * t + fx * (1 - t), cy * t + fy * (1 - t)), r * t))
         facecolors.append(rgb)
     pc = PatchCollection(circles, match_original=False)
@@ -141,7 +142,7 @@ def _maybe_reduce(atoms):
 
 def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
            style="realistic", radius_scale=DEFAULT_RADIUS_SCALE,
-           show_cell=True, reduce_cell=False):
+           show_cell=True, reduce_cell=False, rings=None):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
     Parameters
@@ -162,6 +163,10 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     reduce_cell : bool
         Niggli-reduce the cell before drawing so oblique boxes are not heavily
         sheared. Changes which periodic images are shown; off by default.
+    rings : int, optional
+        Gradient rings per sphere (default :data:`NR` = 220). Fewer rings give
+        much smaller vector files at slightly coarser gradients — useful for
+        many-panel figures or large systems.
     """
     palette = get_palette(palette)
     S = get_style(style)
@@ -170,7 +175,8 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     if ax is None:
         _, ax = plt.subplots(figsize=(4, 4))
 
-    ramp, white = _curves(S)
+    ts = _ring_ts(int(rings) if rings else NR)
+    ramp, white = _curves(S, 1.0 - ts)
     R = rotate(rotation)
     pos = atoms.positions @ R
     center = pos.mean(0)
@@ -197,7 +203,7 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
         if S["depth_desat"]:
             col = _desaturate(col, S["depth_desat"] * (1.0 - znorm[i]))
         base, pc = _sphere_patches(x[i], y[i], radii[i], col, dim[i],
-                                   10 + 2 * zi, S, ramp, white)
+                                   10 + 2 * zi, S, ts, ramp, white)
         ax.add_patch(base)
         if pc is not None:
             ax.add_collection(pc)
