@@ -16,7 +16,7 @@ from .styles import get_style
 #: Default viewing rotation (ASE ``rotate`` syntax): a very slight, nearly face-on tilt.
 DEFAULT_ROTATION = "-6x,-5y,0z"
 #: Default atom size as a fraction of the covalent radius.
-DEFAULT_RADIUS_SCALE = 0.65
+DEFAULT_RADIUS_SCALE = 0.85
 #: Default number of nested circles per sphere (higher = smoother gradient,
 #: larger vector files). Override per call with ``render(..., rings=N)``.
 NR = 220
