@@ -29,7 +29,8 @@ crystalvase traj.xyz out.png --index ::10 --style cartoon     # slice -> one fil
 ```
 
 Format is taken from the extension. Main options (API kwargs = CLI flags): `rotation`
-(ASE `"<a>x,<b>y,<c>z"` syntax), `palette`, `style`, `radius_scale`, `show_cell`,
+(ASE `"<a>x,<b>y,<c>z"` syntax), `palette`, `style`, `radius_scale` (`"small"` /
+`"medium"` / `"large"` / `"xlarge"` or a number; default medium), `show_cell`,
 `reduce_cell`, `rings` (gradient rings per sphere, default 220 — fewer gives much
 smaller vector files, e.g. `rings=40` for many-panel figures), plus
 `figsize`/`dpi`/`background` for saving.

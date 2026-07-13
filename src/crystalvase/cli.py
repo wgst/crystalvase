@@ -39,8 +39,9 @@ def build_parser():
     p.add_argument("--palette", default="jmol", help="jmol | vesta | vmd (default: jmol)")
     p.add_argument("--style", default="realistic",
                    help="shade style name (default: realistic)")
-    p.add_argument("--radius-scale", type=float, default=DEFAULT_RADIUS_SCALE,
-                   help=f"atom size vs covalent radius (default: {DEFAULT_RADIUS_SCALE})")
+    p.add_argument("--radius-scale", default=DEFAULT_RADIUS_SCALE,
+                   help="atom size: small | medium | large | xlarge, or a number "
+                        f"(fraction of covalent radius; default: {DEFAULT_RADIUS_SCALE})")
     p.add_argument("--no-cell", action="store_true", help="do not draw the unit cell")
     p.add_argument("--reduce-cell", action="store_true",
                    help="Niggli-reduce the cell so oblique boxes aren't sheared")

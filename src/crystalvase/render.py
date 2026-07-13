@@ -15,8 +15,23 @@ from .styles import get_style
 
 #: Default viewing rotation (ASE ``rotate`` syntax): a very slight, nearly face-on tilt.
 DEFAULT_ROTATION = "-6x,-5y,0z"
-#: Default atom size as a fraction of the covalent radius.
-DEFAULT_RADIUS_SCALE = 0.85
+#: Named atom-size presets (fraction of the covalent radius).
+RADIUS_SCALES = {"small": 0.65, "medium": 0.85, "large": 1.05, "xlarge": 1.25}
+#: Default atom size: preset name or fraction of the covalent radius.
+DEFAULT_RADIUS_SCALE = "medium"
+
+
+def _resolve_radius_scale(rs):
+    """Resolve a preset name ("small"/"medium"/"large"/"xlarge") or number."""
+    if isinstance(rs, str):
+        if rs in RADIUS_SCALES:
+            return RADIUS_SCALES[rs]
+        try:
+            return float(rs)
+        except ValueError:
+            raise ValueError(f"unknown radius scale {rs!r}; choose from "
+                             f"{sorted(RADIUS_SCALES)} or pass a number")
+    return float(rs)
 #: Default number of nested circles per sphere (higher = smoother gradient,
 #: larger vector files). Override per call with ``render(..., rings=N)``.
 NR = 220
@@ -156,8 +171,10 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     style : str or dict
         Shade style name (see :data:`crystalvase.styles.STYLES`) or overrides dict.
         Families: ``cartoon*``, ``realistic*`` (default), ``ase*``.
-    radius_scale : float
-        Atom radius as a fraction of the covalent radius.
+    radius_scale : str or float
+        Atom size: preset ``"small"`` (0.65), ``"medium"`` (0.85, default),
+        ``"large"`` (1.05), ``"xlarge"`` (1.25), or a fraction of the covalent
+        radius.
     show_cell : bool
         Draw the unit-cell wireframe (ignored for non-periodic systems).
     reduce_cell : bool
@@ -170,6 +187,7 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     """
     palette = get_palette(palette)
     S = get_style(style)
+    radius_scale = _resolve_radius_scale(radius_scale)
     if reduce_cell:
         atoms = _maybe_reduce(atoms)
     if ax is None:

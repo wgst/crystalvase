@@ -17,7 +17,8 @@ and :func:`write` for options; :data:`PALETTES` and :data:`STYLES` list the choi
 """
 __version__ = "0.1.0"
 
-from .render import render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE, NR
+from .render import (render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE,
+                     RADIUS_SCALES, NR)
 from .io import write, VECTOR_EXTS, RASTER_EXTS
 from .palettes import (PALETTES, adjust, retone, get_palette, jmol_colors,
                        vesta_colors, vmd_colors)
@@ -31,6 +32,6 @@ __all__ = [
     "PALETTES", "adjust", "retone", "get_palette", "jmol_colors", "vesta_colors",
     "vmd_colors",
     "STYLES", "DEFAULT_STYLE", "make_style", "get_style",
-    "DEFAULT_ROTATION", "DEFAULT_RADIUS_SCALE", "NR",
+    "DEFAULT_ROTATION", "DEFAULT_RADIUS_SCALE", "RADIUS_SCALES", "NR",
     "VECTOR_EXTS", "RASTER_EXTS", "__version__",
 ]
