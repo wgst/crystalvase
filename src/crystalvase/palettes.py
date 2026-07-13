@@ -132,17 +132,42 @@ PALETTES.update(
     deep=adjust(jmol_colors, sat=1.15, bright=0.80),         # rich darker jewel tones
 )
 
-# shade variants: every element stays in its colour family (red stays red, blue
-# stays blue), but the shade shifts — e.g. coral vs cherry red, sea vs ink blue
+def retone(palette, hue=0.0, sat=None, value=None, pull=0.85):
+    """Retone a palette: rotate hues by ``hue`` degrees, then PULL the saturation
+    and value of every *coloured* element toward the targets ``sat``/``value``
+    (0..1) with strength ``pull``. Neutral elements (white H, grey C, silvery
+    metals) are left untouched.
+
+    Unlike :func:`adjust` (which multiplies, keeping each colour's character),
+    this converges all colours onto a common tone — giving genuinely different
+    schemes in the way "forest", "mint", "olive" and "neon" are all greens."""
+    import matplotlib.colors as mcolors
+    arr = np.clip(np.asarray(get_palette(palette), dtype=float).copy(), 0, 1)
+    hsv = mcolors.rgb_to_hsv(arr)
+    # 0 for neutrals -> 1 for clearly coloured elements (smoothstep on saturation)
+    w = np.clip((hsv[:, 1] - 0.08) / (0.30 - 0.08), 0, 1)
+    w = w * w * (3 - 2 * w)
+    if hue:
+        hsv[:, 0] = (hsv[:, 0] + hue / 360.0) % 1.0
+    if sat is not None:
+        hsv[:, 1] += (sat - hsv[:, 1]) * pull * w
+    if value is not None:
+        hsv[:, 2] += (value - hsv[:, 2]) * pull * w
+    return mcolors.hsv_to_rgb(np.clip(hsv, 0, 1))
+
+
+# tone schemes: every element keeps its hue family, but all coloured elements
+# converge onto the scheme's tone — like the many named variants of "green"
+# (forest, mint, emerald, olive, neon, sage, ...) applied palette-wide
 PALETTES.update(
-    coral=adjust(jmol_colors, hue=+12, sat=0.82, bright=1.10, mix_white=0.10),
-    cherry=adjust(jmol_colors, hue=-10, sat=1.20, bright=0.84),
-    sea=adjust(jmol_colors, hue=-18, sat=0.92, bright=1.00),
-    spring=adjust(jmol_colors, hue=+14, sat=0.95, bright=1.06),
-    dusk=adjust(jmol_colors, hue=-8, sat=0.62, bright=0.92),
-    ink=adjust(jmol_colors, hue=-6, sat=1.05, bright=0.74),
-    candy=adjust(jmol_colors, hue=+6, sat=1.10, bright=1.12, mix_white=0.06),
-    autumn=adjust(jmol_colors, hue=+9, sat=0.88, bright=0.80),
-    ice=adjust(jmol_colors, hue=-12, sat=0.55, bright=1.15, mix_white=0.20),
-    neon=adjust(jmol_colors, hue=-4, sat=1.55, bright=1.15),
+    forest=retone(jmol_colors, hue=-8, sat=0.80, value=0.45),      # deep & full
+    wine=retone(jmol_colors, hue=-14, sat=0.65, value=0.55),        # muted vintage
+    emerald=retone(jmol_colors, hue=-6, sat=0.95, value=0.72),      # jewel tones
+    olive=retone(jmol_colors, hue=+22, sat=0.55, value=0.62),       # warm earthy
+    mint=retone(jmol_colors, hue=+6, sat=0.42, value=0.96, pull=0.9),   # light & fresh
+    blossom=retone(jmol_colors, hue=+14, sat=0.35, value=1.0, pull=0.9),  # airy warm pastel
+    tropical=retone(jmol_colors, hue=-20, sat=0.90, value=0.95),    # bright, cyan-leaning
+    neon=retone(jmol_colors, hue=-4, sat=1.0, value=1.0, pull=0.95),      # electric
+    sage=retone(jmol_colors, hue=-4, sat=0.30, value=0.78, pull=0.9),     # dusty greyed
+    midnight=retone(jmol_colors, hue=-10, sat=0.75, value=0.32),    # very dark, moody
 )
