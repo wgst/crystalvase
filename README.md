@@ -34,9 +34,12 @@ Format is taken from the extension. Main options (API kwargs = CLI flags): `rota
 
 ## Palettes & styles
 
-- **Palettes:** `jmol` (ASE default), `vesta`, `vmd`. Same colours across every style.
+- **Palettes:** `jmol` (ASE default), `vesta`, `vmd`, plus tone-adjusted takes on the
+  ASE colours: `pastel`, `muted`, `vivid`, `deep` (same hues per element, prettier tones;
+  roll your own with `cv.adjust("jmol", sat=..., bright=..., mix_white=...)`).
 - **Styles** (shading only), three families, all depth-shaded so structure stays clear:
-  `cartoon` — cel-shaded artistic, tinted shadows (`cartoon-warm`, `cartoon-shift`, `cartoon-soft`);
+  `cartoon` — flat "sticker" discs shaded at the edges, outlined (`cartoon-dot` adds a
+  gloss dot, `cartoon-soft` is smooth matte pastel);
   `realistic` — studio-lit gloss, the default (`realistic-warm`, `realistic-cool`);
   `ase` — classic flat ASE look, outlined + depth-dimmed (`ase-shaded`).
   Custom: `cv.make_style(edge_dark=0.6, hot_amt=1.0, ...)` — see `styles.py`.

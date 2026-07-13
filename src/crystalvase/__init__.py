@@ -19,7 +19,8 @@ __version__ = "0.1.0"
 
 from .render import render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE, NR
 from .io import write, VECTOR_EXTS, RASTER_EXTS
-from .palettes import PALETTES, get_palette, jmol_colors, vesta_colors, vmd_colors
+from .palettes import (PALETTES, adjust, get_palette, jmol_colors, vesta_colors,
+                       vmd_colors)
 from .styles import STYLES, DEFAULT_STYLE, make_style, get_style
 
 #: Alias — :func:`render` draws onto an Axes, mirroring ``ase.visualize.plot.plot_atoms``.
@@ -27,7 +28,7 @@ plot = render
 
 __all__ = [
     "render", "plot", "write",
-    "PALETTES", "get_palette", "jmol_colors", "vesta_colors", "vmd_colors",
+    "PALETTES", "adjust", "get_palette", "jmol_colors", "vesta_colors", "vmd_colors",
     "STYLES", "DEFAULT_STYLE", "make_style", "get_style",
     "DEFAULT_ROTATION", "DEFAULT_RADIUS_SCALE", "NR",
     "VECTOR_EXTS", "RASTER_EXTS", "__version__",

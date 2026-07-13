@@ -90,6 +90,20 @@ _VMD = {
 vmd_colors = _from_symbol_table(_VMD, jmol_colors)
 
 
+def adjust(palette, sat=1.0, bright=1.0, mix_white=0.0):
+    """Return a tone-adjusted copy of ``palette``: optionally mix towards white
+    (``mix_white`` in 0..1, pastelises), then scale HSV saturation and value.
+    Element identity stays recognisable — only the tone changes."""
+    import matplotlib.colors as mcolors
+    arr = np.clip(np.asarray(get_palette(palette), dtype=float).copy(), 0, 1)
+    if mix_white:
+        arr = arr * (1.0 - mix_white) + mix_white
+    hsv = mcolors.rgb_to_hsv(arr)
+    hsv[:, 1] = np.clip(hsv[:, 1] * sat, 0, 1)
+    hsv[:, 2] = np.clip(hsv[:, 2] * bright, 0, 1)
+    return mcolors.hsv_to_rgb(hsv)
+
+
 PALETTES = {"jmol": jmol_colors, "vesta": vesta_colors, "vmd": vmd_colors}
 
 
@@ -104,3 +118,12 @@ def get_palette(palette):
     if arr.ndim != 2 or arr.shape[1] != 3:
         raise ValueError("a custom palette must be an (n_elements, 3) RGB array")
     return arr
+
+
+# tone-adjusted takes on the ASE/Jmol colours (same element hues, prettier tones)
+PALETTES.update(
+    pastel=adjust(jmol_colors, sat=0.80, mix_white=0.30),   # soft, lifted towards white
+    muted=adjust(jmol_colors, sat=0.60, bright=0.95),        # calm flat-design tones
+    vivid=adjust(jmol_colors, sat=1.45, bright=1.03),        # punchy saturated
+    deep=adjust(jmol_colors, sat=1.15, bright=0.80),         # rich darker jewel tones
+)

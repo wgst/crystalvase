@@ -3,8 +3,9 @@ palette; styles only change shading/tone (plus optional HSV ``sat``/``bright``).
 
 Three families, each with variants (pick with ``style="<name>"``):
 
-- ``cartoon``   — simple artistic 3D: cel-shaded bands, tinted shadows, no gloss.
-                  Variants: ``cartoon-warm``, ``cartoon-shift``, ``cartoon-soft``.
+- ``cartoon``   — simple artistic 3D: flat "sticker" discs shaded only near the
+                  edge, outlined. Variants: ``cartoon-dot`` (adds a gloss dot),
+                  ``cartoon-soft`` (smooth matte pastel, colour-derived rim).
 - ``realistic`` — studio-lit glossy spheres with deep shading (default).
                   Variants: ``realistic-warm``, ``realistic-cool``.
 - ``ase``       — the classic flat ASE look (outlined discs), vector and
@@ -55,11 +56,11 @@ def make_style(**overrides):
 
 
 # family bases (numbers shared by the variants)
-_TOON = dict(
-    posterize=3, edge_dark=0.55, body0=0.70, body_gain=0.40, body_end=0.95,
-    soft_amt=0.0, hot_amt=0.45, hot_start=0.90, spec=(1.0, 0.97, 0.86),
-    depth_lo=0.55, depth_desat=0.45, outline=0.35, outline_lw=1.1,
-    sat=1.08, bright=1.06, hx=-0.26, hy=0.28,
+_STICKER = dict(                       # flat like ASE, but shaded near the edge -> 3D
+    edge_dark=0.42, body0=0.52, body_gain=0.48, body_end=0.28,
+    soft_amt=0.0, hot_amt=0.0, shadow_tint=(0.90, 0.89, 1.0),
+    hx=-0.12, hy=0.14, depth_lo=0.55, depth_desat=0.25,
+    outline_color=(0, 0, 0), outline_lw=1.0, sat=1.02, bright=1.04,
 )
 _REAL = dict(
     edge_dark=0.40, body0=0.54, body_gain=0.52, body_end=0.92,
@@ -69,12 +70,10 @@ _REAL = dict(
 )
 
 STYLES = {
-    # -- cartoon: simple artistic 3D, cel bands, tinted shadows, no high gloss --
-    "cartoon":        make_style(**_TOON, shadow_tint=(0.62, 0.58, 1.04)),   # violet shadows
-    "cartoon-warm":   make_style(**{**_TOON, "spec": (1.0, 0.99, 0.92)},
-                                 shadow_tint=(1.06, 0.66, 0.45)),            # amber shadows
-    "cartoon-shift":  make_style(**_TOON, shadow_hue=45.0,
-                                 shadow_tint=(0.74, 0.72, 0.94)),            # hue-rotated shadows
+    # -- cartoon: flat "sticker" discs with an edge gradient (ASE-like but 3D) --
+    "cartoon":        make_style(**_STICKER),                                # + black outline
+    "cartoon-dot":    make_style(**{**_STICKER, "hot_amt": 0.85, "hot_start": 0.88,
+                                    "hx": -0.20, "hy": 0.22}),               # + gloss dot
     "cartoon-soft":   make_style(edge_dark=0.72, body0=0.80, body_gain=0.28, body_end=0.90,
                                  soft_amt=0.16, soft_start=0.40, hot_amt=0.0,
                                  shadow_tint=(0.78, 0.75, 1.02), sat=0.88, bright=1.10,
