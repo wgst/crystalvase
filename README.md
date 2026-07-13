@@ -5,7 +5,7 @@
 # crystalvase
 
 Tool for generating true **vector** figures of [ASE](https://wiki.fysik.dtu.dk/ase/) structures with
-matplotlib — no POV-Ray.
+matplotlib.
 
 <img src="docs/preview.png" width="520" alt="crystalvase preview">
 
