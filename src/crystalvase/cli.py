@@ -61,7 +61,14 @@ def build_parser():
     p.add_argument("--background", default=None,
                    help="background colour (default: transparent where supported)")
     p.add_argument("--title", default=None,
-                   help="title text; use 'formula' for the chemical formula")
+                   help="title text above the figure; use 'formula' for the chemical formula")
+    p.add_argument("--label", default=None,
+                   help="label below the figure; use 'formula' for the chemical formula")
+    p.add_argument("--label-size", type=float, default=13, help="label font size")
+    p.add_argument("--label-weight", default="extra bold",
+                   help="label boldness: normal | bold | 'extra bold' | black")
+    p.add_argument("--label-rotation", type=float, default=0,
+                   help="label orientation in degrees (0 = horizontal)")
     p.add_argument("--list-palettes", action="store_true", help="list palettes and exit")
     p.add_argument("--list-styles", action="store_true", help="list shade styles and exit")
     p.add_argument("--version", action="version", version=f"crystalvase {__version__}")
@@ -93,8 +100,9 @@ def main(argv=None):
         write(atoms, out, rotation=args.rotation, palette=args.palette, style=args.style,
               radius_scale=args.radius_scale, show_cell=not args.no_cell,
               reduce_cell=args.reduce_cell, rings=args.rings, cell_color=args.cell_color,
-              cell_width=args.cell_width, figsize=args.figsize, dpi=args.dpi,
-              background=args.background, title=title)
+              cell_width=args.cell_width, label=args.label, label_size=args.label_size,
+              label_weight=args.label_weight, label_rotation=args.label_rotation,
+              figsize=args.figsize, dpi=args.dpi, background=args.background, title=title)
         print("wrote", out)
     return 0
 

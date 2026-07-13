@@ -174,7 +174,8 @@ def _maybe_reduce(atoms):
 def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
            style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE,
            show_cell=True, reduce_cell=False, rings=None,
-           cell_color=None, cell_width=None):
+           cell_color=None, cell_width=None,
+           label=None, label_size=13, label_weight="extra bold", label_rotation=0):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
     Parameters
@@ -208,6 +209,16 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         style's ``cell_color`` (black for ``clean``, mid-grey otherwise).
     cell_width : float, optional
         Line width of the unit-cell wireframe; defaults to the style's value.
+    label : str, optional
+        Text drawn below the figure (e.g. a chemical formula). Pass ``"formula"``
+        for the structure's chemical formula. No label if ``None``.
+    label_size : float
+        Label font size (default 13).
+    label_weight : matplotlib font weight
+        Label boldness — ``"normal"``, ``"bold"``, ``"extra bold"`` (default),
+        ``"black"`` or a number 0-1000.
+    label_rotation : float
+        Label orientation in degrees (0 = horizontal, default).
     """
     palette = get_palette(palette)
     S = get_style(style)
@@ -277,4 +288,10 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
     ax.set_aspect("equal")
     ax.set_axis_off()
     ax.patch.set_alpha(0.0)
+
+    if label:
+        if label == "formula":
+            label = atoms.get_chemical_formula()
+        ax.text(0.5, -0.02, label, transform=ax.transAxes, ha="center", va="top",
+                fontsize=label_size, fontweight=label_weight, rotation=label_rotation)
     return ax

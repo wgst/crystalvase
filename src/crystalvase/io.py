@@ -17,6 +17,7 @@ _NO_ALPHA = {".jpg", ".jpeg", ".bmp"}      # formats without transparency
 def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
           style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
           reduce_cell=False, rings=None, cell_color=None, cell_width=None,
+          label=None, label_size=13, label_weight="extra bold", label_rotation=0,
           figsize=4.0, dpi=200, transparent=True, background=None, title=None):
     """Render ``atoms`` and save to ``filename`` (format from the extension).
 
@@ -25,10 +26,12 @@ def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
     atoms : ase.Atoms
     filename : str
         Output path; extension selects the format (see module docstring).
-    rotation, palette, style, radius_scale, show_cell, reduce_cell, rings, cell_color, cell_width
+    rotation, palette, style, radius_scale, show_cell, reduce_cell, rings, cell_color,
+    cell_width, label, label_size, label_weight, label_rotation
         Passed through to :func:`crystalvase.render` (``rings``: fewer gradient
         rings -> much smaller vector files; ``cell_color``/``cell_width``: unit-cell
-        wireframe appearance, defaulting to the style's values).
+        wireframe appearance; ``label`` below the figure — ``"formula"`` for the
+        chemical formula — with ``label_size``/``label_weight``/``label_rotation``).
     figsize : float or (w, h)
         Figure size in inches (a scalar means a square).
     dpi : int
@@ -58,7 +61,9 @@ def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
     try:
         render(atoms, ax, rotation=rotation, palette=palette, style=style,
                radius_scale=radius_scale, show_cell=show_cell, reduce_cell=reduce_cell,
-               rings=rings, cell_color=cell_color, cell_width=cell_width)
+               rings=rings, cell_color=cell_color, cell_width=cell_width,
+               label=label, label_size=label_size, label_weight=label_weight,
+               label_rotation=label_rotation)
         if title:
             ax.set_title(title, fontsize=9)
 

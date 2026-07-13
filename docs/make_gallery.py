@@ -108,9 +108,9 @@ def main():
     demo_styles = ["clean", "ase", "cartoon-soft"]
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))
     cv.render(wb, axes.flat[0], style="realistic", palette=WPAL, radius_scale=WSIZE,
-              rotation=WROT, rings=140)
+              rotation=WROT, rings=140, label="formula")
     for ax, atoms, st in zip(axes.flat[1:], demo, demo_styles):
-        cv.render(atoms, ax, style=st, reduce_cell=True, rings=140)
+        cv.render(atoms, ax, style=st, reduce_cell=True, rings=140, label="formula")
     for ax in axes.flat[1 + len(demo):]:
         ax.set_axis_off()
     fig.savefig(f"{HERE}/preview.png", bbox_inches="tight", dpi=200)

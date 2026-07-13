@@ -36,7 +36,9 @@ Format is taken from the extension. Main options (API kwargs = CLI flags): `rota
 `"medium"` / `"large"` / `"xlarge"` or a number), `show_cell`, `reduce_cell`, `rings`
 (gradient rings per sphere, default 220 — fewer gives much smaller vector files, e.g.
 `rings=40` for many-panel figures), `cell_color` / `cell_width` (unit-cell wireframe —
-any matplotlib colour: `black`, `lightgray`, `dimgray`, `"0.3"`, `#444`, …), plus
+any matplotlib colour: `black`, `lightgray`, `dimgray`, `"0.3"`, `#444`, …), `label`
+(text below the figure — `label="formula"` for the chemical formula — with
+`label_size` / `label_weight` / `label_rotation`; default extra-bold), plus
 `figsize`/`dpi`/`background` for saving.
 
 ## Palettes & styles
