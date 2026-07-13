@@ -133,16 +133,28 @@ def _sphere_patches(cx, cy, r, color, dim, z0, S, ts, ramp, white):
     return base, pc
 
 
-def _draw_cell(cell, R, ax, pos_offset, color="0.55", lw=0.6):
-    corners = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
-                        [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]], float)
-    pts = (corners @ cell) @ R - pos_offset
-    edges = [(0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (2, 4),
-             (2, 6), (3, 5), (3, 6), (4, 7), (5, 7), (6, 7)]
-    for a, b in edges:
-        ax.plot([pts[a, 0], pts[b, 0]], [pts[a, 1], pts[b, 1]],
-                color=color, lw=lw, zorder=1)
-    return pts
+_CELL_CORNERS = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
+                          [1, 1, 0], [1, 0, 1], [0, 1, 1], [1, 1, 1]], float)
+_CELL_EDGES = [(0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (2, 4),
+               (2, 6), (3, 5), (3, 6), (4, 7), (5, 7), (6, 7)]
+
+
+def _cell_corners(cell, R, pos_offset):
+    """Projected unit-cell corners, shape (8, 3) with a depth (z) column."""
+    return (_CELL_CORNERS @ cell) @ R - pos_offset
+
+
+def _draw_cell(corners, ax, zof, color="0.55", lw=0.6, nseg=24):
+    """Draw the wireframe box as short segments, each z-ordered by its own depth
+    so the box passes through the structure — partly in front, partly behind."""
+    ts = np.linspace(0.0, 1.0, nseg + 1)
+    for a, b in _CELL_EDGES:
+        pa, pb = corners[a], corners[b]
+        seg = pa[None, :] + ts[:, None] * (pb - pa)[None, :]     # (nseg+1, 3)
+        for k in range(nseg):
+            p0, p1 = seg[k], seg[k + 1]
+            ax.plot([p0[0], p1[0]], [p0[1], p1[1]], color=color, lw=lw,
+                    solid_capstyle="round", zorder=zof(0.5 * (p0[2] + p1[2])))
 
 
 def _maybe_reduce(atoms):
@@ -218,15 +230,25 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
 
     cell_pts = None
     if show_cell and atoms.cell.rank == 3:
-        cell_pts = _draw_cell(atoms.cell[:], R, ax, pos_offset=center,
-                              color=S["cell_color"], lw=S["cell_lw"])
+        cell_pts = _cell_corners(atoms.cell[:], R, pos_offset=center)
 
-    for zi, i in enumerate(np.argsort(z)):          # back to front
+    # unified depth -> zorder for atoms AND cell segments, so the box composites
+    # by depth (front edges over atoms, back edges behind them)
+    zall = z if cell_pts is None else np.concatenate([z, cell_pts[:, 2]])
+    zlo, zspan = zall.min(), (np.ptp(zall) + 1e-9)
+
+    def zof(zv):
+        return 20.0 + (zv - zlo) / zspan * 200.0
+
+    if cell_pts is not None:
+        _draw_cell(cell_pts, ax, zof, color=S["cell_color"], lw=S["cell_lw"])
+
+    for i in np.argsort(z):          # back to front (insertion order breaks zorder ties)
         col = colors[i]
         if S["depth_desat"]:
             col = _desaturate(col, S["depth_desat"] * (1.0 - znorm[i]))
         base, pc = _sphere_patches(x[i], y[i], radii[i], col, dim[i],
-                                   10 + 2 * zi, S, ts, ramp, white)
+                                   zof(z[i]), S, ts, ramp, white)
         ax.add_patch(base)
         if pc is not None:
             ax.add_collection(pc)
