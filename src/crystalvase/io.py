@@ -6,15 +6,16 @@ import os
 
 import matplotlib.pyplot as plt
 
-from .render import render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE
+from .render import (render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE,
+                     DEFAULT_PALETTE, DEFAULT_STYLE_NAME)
 
 VECTOR_EXTS = {".pdf", ".svg", ".eps", ".ps"}
 RASTER_EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 _NO_ALPHA = {".jpg", ".jpeg", ".bmp"}      # formats without transparency
 
 
-def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette="jmol",
-          style="realistic", radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
+def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
+          style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
           reduce_cell=False, rings=None, figsize=4.0, dpi=200, transparent=True,
           background=None, title=None):
     """Render ``atoms`` and save to ``filename`` (format from the extension).

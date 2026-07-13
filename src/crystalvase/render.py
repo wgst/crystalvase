@@ -15,10 +15,14 @@ from .styles import get_style
 
 #: Default viewing rotation (ASE ``rotate`` syntax): a very slight, nearly face-on tilt.
 DEFAULT_ROTATION = "-6x,-5y,0z"
+#: Default element colour palette (name in :data:`crystalvase.PALETTES`).
+DEFAULT_PALETTE = "blossom"
+#: Default shade style (name in :data:`crystalvase.STYLES`).
+DEFAULT_STYLE_NAME = "realistic"
 #: Named atom-size presets (fraction of the covalent radius).
 RADIUS_SCALES = {"small": 0.65, "medium": 0.85, "large": 1.05, "xlarge": 1.25}
 #: Default atom size: preset name or fraction of the covalent radius.
-DEFAULT_RADIUS_SCALE = "xlarge"
+DEFAULT_RADIUS_SCALE = "large"
 
 
 def _resolve_radius_scale(rs):
@@ -155,8 +159,8 @@ def _maybe_reduce(atoms):
         return atoms
 
 
-def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
-           style="realistic", radius_scale=DEFAULT_RADIUS_SCALE,
+def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
+           style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE,
            show_cell=True, reduce_cell=False, rings=None):
     """Draw ``atoms`` onto ``ax`` (created if ``None``); returns the Axes.
 
@@ -167,10 +171,11 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette="jmol",
     rotation : str
         Viewing rotation in ASE ``rotate`` syntax, e.g. ``"-6x,-5y,0z"``.
     palette : str or (n, 3) array
-        Element colours: ``"jmol"`` (ASE default), ``"vesta"``, ``"vmd"``, or an array.
+        Element colours: a name in :data:`crystalvase.PALETTES` (default
+        ``"blossom"``) or an ``(n, 3)`` array. ``"jmol"`` is the ASE palette.
     style : str or dict
         Shade style name (see :data:`crystalvase.styles.STYLES`) or overrides dict.
-        Families: ``cartoon*``, ``realistic*`` (default), ``ase*``.
+        Default ``"realistic"``; families ``clean``, ``cartoon*``, ``realistic*``, ``ase*``.
     radius_scale : str or float
         Atom size: preset ``"small"`` (0.65), ``"medium"`` (0.85),
         ``"large"`` (1.05), ``"xlarge"`` (1.25, default), or a fraction of the

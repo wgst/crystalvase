@@ -13,7 +13,8 @@ from . import __version__
 from .io import write, VECTOR_EXTS, RASTER_EXTS
 from .palettes import PALETTES
 from .styles import STYLES
-from .render import DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE
+from .render import (DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE, DEFAULT_PALETTE,
+                     DEFAULT_STYLE_NAME)
 
 
 def _numbered(path, i):
@@ -36,9 +37,10 @@ def build_parser():
                         "A slice writes one file per frame.")
     p.add_argument("--rotation", default=DEFAULT_ROTATION,
                    help=f"view rotation, ASE syntax (default: {DEFAULT_ROTATION!r})")
-    p.add_argument("--palette", default="jmol", help="jmol | vesta | vmd (default: jmol)")
-    p.add_argument("--style", default="realistic",
-                   help="shade style name (default: realistic)")
+    p.add_argument("--palette", default=DEFAULT_PALETTE,
+                   help=f"palette name; see --list-palettes (default: {DEFAULT_PALETTE})")
+    p.add_argument("--style", default=DEFAULT_STYLE_NAME,
+                   help=f"shade style name; see --list-styles (default: {DEFAULT_STYLE_NAME})")
     p.add_argument("--radius-scale", default=DEFAULT_RADIUS_SCALE,
                    help="atom size: small | medium | large | xlarge, or a number "
                         f"(fraction of covalent radius; default: {DEFAULT_RADIUS_SCALE})")
