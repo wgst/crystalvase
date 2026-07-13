@@ -3,7 +3,9 @@
 Tool for generating true **vector** figures of [ASE](https://wiki.fysik.dtu.dk/ase/) structures with
 matplotlib — no POV-Ray.
 
-![styles](docs/preview.png)
+<img src="docs/preview.png" width="360" alt="crystalvase preview">
+
+*(the very same figure as true vector: [docs/preview.pdf](docs/preview.pdf))*
 
 ## Install
 
@@ -53,3 +55,20 @@ Format is taken from the extension. Main options (API kwargs = CLI flags): `rota
 
 `crystalvase --list-palettes` / `--list-styles` print the choices; `examples/` compares
 them. Run the tests with `pytest`. MIT licensed.
+
+## Reference galleries
+
+Pick a `style`, `palette` and `radius_scale` by eye. Regenerate with
+`python docs/make_gallery.py` (self-contained — builds its own demo structures).
+
+**Styles** (default palette):
+
+![styles](docs/styles.png)
+
+**Palettes** (default style):
+
+![palettes](docs/palettes.png)
+
+**Sizes** (`radius_scale`):
+
+![sizes](docs/sizes.png)

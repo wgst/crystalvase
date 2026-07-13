@@ -18,4 +18,6 @@ env/
 *.png
 *.jpg
 *.svg
-!docs/**/*.png
+# ...but keep the committed reference galleries
+!docs/*.png
+!docs/*.pdf
