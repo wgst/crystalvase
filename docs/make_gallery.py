@@ -78,9 +78,8 @@ def main():
     wb = water_box()
     cl = demo_cluster()
 
-    # water renders read best in a deep red at xlarge (only O+H, so emerald and
-    # jmol look nearly the same here — emerald just deepens the red)
-    WPAL, WSIZE, WROT = "emerald", "xlarge", "8x,-14y,0z"
+    # water renders read best in classic jmol red/white at xlarge
+    WPAL, WSIZE, WROT = "jmol", "xlarge", "8x,-14y,0z"
 
     # styles: every style on the water box
     _grid(STYLES, lambda s, ax: cv.render(wb, ax, style=s, palette=WPAL,
