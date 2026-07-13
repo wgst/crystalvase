@@ -61,7 +61,7 @@ them. Run the tests with `pytest`. MIT licensed.
 Pick a `style`, `palette` and `radius_scale` by eye. Regenerate with
 `python docs/make_gallery.py` (self-contained — builds its own demo structures).
 
-**Styles** (default palette):
+**Styles** (water box, `emerald`):
 
 ![styles](docs/styles.png)
 

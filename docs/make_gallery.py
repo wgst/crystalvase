@@ -78,27 +78,31 @@ def main():
     wb = water_box()
     cl = demo_cluster()
 
-    # styles: every style on the water box, default palette/size
-    _grid(STYLES, lambda s, ax: cv.render(wb, ax, style=s, rotation="8x,-14y,0z",
-                                          rings=160),
+    # water renders read best in a deep red at xlarge (only O+H, so emerald and
+    # jmol look nearly the same here — emerald just deepens the red)
+    WPAL, WSIZE, WROT = "emerald", "xlarge", "8x,-14y,0z"
+
+    # styles: every style on the water box
+    _grid(STYLES, lambda s, ax: cv.render(wb, ax, style=s, palette=WPAL,
+                                          radius_scale=WSIZE, rotation=WROT, rings=160),
           ncol=3, title_fn=str, path=f"{HERE}/styles.png",
-          suptitle=f"styles  (palette={cv.DEFAULT_PALETTE})")
+          suptitle=f"styles  (palette={WPAL}, size={WSIZE})")
 
     # palettes: every palette on the diverse cluster, default style/size
     _grid(PALETTES, lambda p, ax: cv.render(cl, ax, palette=p, rings=160),
           ncol=6, title_fn=str, path=f"{HERE}/palettes.png",
           suptitle=f"palettes  (style={cv.DEFAULT_STYLE_NAME})")
 
-    # sizes: the presets on the water box, default style/palette
-    _grid(SIZES, lambda s, ax: cv.render(wb, ax, radius_scale=s,
-                                        rotation="8x,-14y,0z", rings=160),
+    # sizes: the presets on the water box (palette fixed so only size varies)
+    _grid(SIZES, lambda s, ax: cv.render(wb, ax, radius_scale=s, palette=WPAL,
+                                        rotation=WROT, rings=160),
           ncol=4, title_fn=lambda s: f"{s}  ({cv.RADIUS_SCALES[s]})",
-          path=f"{HERE}/sizes.png")
+          path=f"{HERE}/sizes.png", suptitle=f"sizes  (palette={WPAL})")
 
-    # hero preview: one clean render with the package defaults, saved as a
-    # high-res PNG (inline in the README) and a true-vector PDF (zoomable)
+    # hero preview: a clean water render, saved as a high-res PNG (inline in the
+    # README) and a true-vector PDF (zoomable)
     fig, ax = plt.subplots(figsize=(5, 5))
-    cv.render(wb, ax, rotation="8x,-14y,0z")
+    cv.render(wb, ax, palette=WPAL, radius_scale=WSIZE, rotation=WROT)
     fig.savefig(f"{HERE}/preview.png", bbox_inches="tight", dpi=200)
     fig.savefig(f"{HERE}/preview.pdf", bbox_inches="tight")
     plt.close(fig)
