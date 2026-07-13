@@ -101,15 +101,16 @@ def main():
           ncol=4, title_fn=lambda s: f"{s}  ({cv.RADIUS_SCALES[s]})",
           path=f"{HERE}/sizes.png", suptitle=f"sizes  (palette={WPAL})")
 
-    # hero preview: a 2x2 showcase — the water box (jmol/xlarge) plus three
-    # crystals from docs/demo/ rendered with the package defaults. Saved as a
-    # high-res PNG (inline in the README) and a true-vector PDF (zoomable).
+    # hero preview: a 2x2 showcase, each panel in a different style — the water
+    # box (realistic, jmol/xlarge) plus three crystals from docs/demo/ (default
+    # palette/size). Saved as a high-res PNG (README) and a true-vector PDF.
     demo = [read(f) for f in sorted(glob.glob(f"{HERE}/demo/*.xyz"))]
+    demo_styles = ["clean", "cartoon-dot", "cartoon-soft"]
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))
-    cv.render(wb, axes.flat[0], palette=WPAL, radius_scale=WSIZE, rotation=WROT,
-              rings=140)
-    for ax, atoms in zip(axes.flat[1:], demo):
-        cv.render(atoms, ax, reduce_cell=True, rings=140)      # package defaults
+    cv.render(wb, axes.flat[0], style="realistic", palette=WPAL, radius_scale=WSIZE,
+              rotation=WROT, rings=140)
+    for ax, atoms, st in zip(axes.flat[1:], demo, demo_styles):
+        cv.render(atoms, ax, style=st, reduce_cell=True, rings=140)
     for ax in axes.flat[1 + len(demo):]:
         ax.set_axis_off()
     fig.savefig(f"{HERE}/preview.png", bbox_inches="tight", dpi=200)
