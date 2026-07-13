@@ -132,11 +132,22 @@ PALETTES.update(
     deep=adjust(jmol_colors, sat=1.15, bright=0.80),         # rich darker jewel tones
 )
 
-def retone(palette, hue=0.0, sat=None, value=None, pull=0.85):
+#: Elements whose HUE is kept at its jmol value by :func:`retone` (so their
+#: strong colour convention survives the scheme's hue rotation — most importantly
+#: oxygen stays red rather than drifting toward gold). Saturation/value still
+#: follow the scheme.
+HUE_ANCHORS = ("O",)
+
+
+def retone(palette, hue=0.0, sat=None, value=None, pull=0.85, anchor=HUE_ANCHORS):
     """Retone a palette: rotate hues by ``hue`` degrees, then PULL the saturation
     and value of every *coloured* element toward the targets ``sat``/``value``
     (0..1) with strength ``pull``. Neutral elements (white H, grey C, silvery
     metals) are left untouched.
+
+    ``anchor`` is a list of element symbols whose hue is NOT rotated — their
+    conventional colour is preserved (default: oxygen, so it stays red). Their
+    saturation/value still follow the scheme.
 
     Unlike :func:`adjust` (which multiplies, keeping each colour's character),
     this converges all colours onto a common tone — giving genuinely different
@@ -148,7 +159,10 @@ def retone(palette, hue=0.0, sat=None, value=None, pull=0.85):
     w = np.clip((hsv[:, 1] - 0.08) / (0.30 - 0.08), 0, 1)
     w = w * w * (3 - 2 * w)
     if hue:
+        idx = [chemical_symbols.index(s) for s in anchor if s in chemical_symbols]
+        kept = hsv[idx, 0].copy()
         hsv[:, 0] = (hsv[:, 0] + hue / 360.0) % 1.0
+        hsv[idx, 0] = kept                 # restore anchored elements' hue
     if sat is not None:
         hsv[:, 1] += (sat - hsv[:, 1]) * pull * w
     if value is not None:
