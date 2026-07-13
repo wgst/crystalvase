@@ -131,3 +131,18 @@ PALETTES.update(
     vivid=adjust(jmol_colors, sat=1.45, bright=1.03),        # punchy saturated
     deep=adjust(jmol_colors, sat=1.15, bright=0.80),         # rich darker jewel tones
 )
+
+# shade variants: every element stays in its colour family (red stays red, blue
+# stays blue), but the shade shifts — e.g. coral vs cherry red, sea vs ink blue
+PALETTES.update(
+    coral=adjust(jmol_colors, hue=+12, sat=0.82, bright=1.10, mix_white=0.10),
+    cherry=adjust(jmol_colors, hue=-10, sat=1.20, bright=0.84),
+    sea=adjust(jmol_colors, hue=-18, sat=0.92, bright=1.00),
+    spring=adjust(jmol_colors, hue=+14, sat=0.95, bright=1.06),
+    dusk=adjust(jmol_colors, hue=-8, sat=0.62, bright=0.92),
+    ink=adjust(jmol_colors, hue=-6, sat=1.05, bright=0.74),
+    candy=adjust(jmol_colors, hue=+6, sat=1.10, bright=1.12, mix_white=0.06),
+    autumn=adjust(jmol_colors, hue=+9, sat=0.88, bright=0.80),
+    ice=adjust(jmol_colors, hue=-12, sat=0.55, bright=1.15, mix_white=0.20),
+    neon=adjust(jmol_colors, hue=-4, sat=1.55, bright=1.15),
+)

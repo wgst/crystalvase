@@ -34,10 +34,11 @@ Format is taken from the extension. Main options (API kwargs = CLI flags): `rota
 
 ## Palettes & styles
 
-- **Palettes:** `jmol` (ASE default), `vesta`, `vmd`, plus tone-adjusted takes on the
-  ASE colours: `pastel`, `muted`, `vivid`, `deep`. Roll your own with
-  `cv.adjust("jmol", sat=..., bright=..., mix_white=..., hue=...)` — `hue` rotates all
-  hues by N degrees for a genuinely different scheme.
+- **Palettes:** `jmol` (ASE default), `vesta`, `vmd`; tone variants of the ASE colours
+  (`pastel`, `muted`, `vivid`, `deep`); and shade schemes that keep every element in its
+  colour family but shift the shade — `coral`, `cherry`, `sea`, `spring`, `dusk`, `ink`,
+  `candy`, `autumn`, `ice`, `neon`. Roll your own with
+  `cv.adjust("jmol", sat=..., bright=..., mix_white=..., hue=...)`.
 - **Styles** (shading only), all depth-shaded so structure stays clear:
   `clean` — bright matte spheres, no outline, black cell box (MD-snapshot look);
   `cartoon` — flat "sticker" discs shaded at the edges, outlined (`cartoon-dot` adds a
