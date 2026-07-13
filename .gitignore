@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# venvs
+.venv/
+venv/
+env/
+
+# example / test output
+*.pdf
+*.png
+*.jpg
+*.svg
+!docs/**/*.png

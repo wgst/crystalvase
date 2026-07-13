@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crystalvase"
+version = "0.1.0"
+description = "Fully-vector, publication-style 3D-looking molecule/crystal figures from ASE Atoms"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "W. Stark", email = "wch.stark@gmail.com" }]
+keywords = ["ase", "chemistry", "materials", "visualization", "vector", "matplotlib"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+    "ase>=3.22",
+    "numpy",
+    "matplotlib>=3.5",
+]
+
+[project.optional-dependencies]
+vesta = ["pymatgen", "pyyaml"]   # for the VESTA colour palette
+raster = ["pillow"]              # for JPEG/TIFF/WebP output
+dev = ["pytest", "pymatgen", "pyyaml", "pillow"]
+
+[project.scripts]
+crystalvase = "crystalvase.cli:main"
+
+[project.urls]
+Homepage = "https://example.invalid/crystalvase"
+
+[tool.setuptools.packages.find]
+where = ["src"]
