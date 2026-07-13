@@ -2,11 +2,14 @@
 fully-vector spheres (an offset radial gradient built from nested filled circles),
 with an optional unit-cell wireframe. Crisp at any zoom; no rasterised atoms.
 """
+import re
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
+from matplotlib.offsetbox import TextArea, HPacker, AnnotationBbox
 from ase.data import covalent_radii
 from ase.utils import rotate
 
@@ -54,6 +57,37 @@ def _pick_label_font():
 
 #: Font used for the optional label (a clean sans available on this system).
 DEFAULT_LABEL_FONT = _pick_label_font()
+
+_BOLD_WEIGHTS = {"semibold", "demibold", "demi", "bold", "heavy", "extra bold", "black"}
+
+
+def _is_bold(weight):
+    if isinstance(weight, (int, float)):
+        return weight >= 600
+    return str(weight).lower() in _BOLD_WEIGHTS
+
+
+def _formula_tokens(s):
+    """Split a formula into runs of digits vs non-digits, e.g. Na2O24 -> Na,2,O,24."""
+    return re.findall(r"[0-9]+|[^0-9]+", s)
+
+
+def _add_formula_label(ax, formula, x, y, size, weight, font):
+    """Formula label with the counts as true subscripts, in ``font`` (composed
+    from separate glyph runs so it works in any font, unlike Unicode subscripts)."""
+    kids = [TextArea(tok, textprops=dict(fontsize=size * (0.62 if tok.isdigit() else 1.0),
+                                         fontweight=weight, fontfamily=font))
+            for tok in _formula_tokens(formula)]
+    box = HPacker(children=kids, align="bottom", pad=0, sep=0)
+    ax.add_artist(AnnotationBbox(box, (x, y), xycoords="axes fraction",
+                                 box_alignment=(0.5, 1.0), frameon=False))
+
+
+def _mathtext_formula(formula, weight):
+    """Formula as a mathtext string with subscripts (used for rotated labels)."""
+    cmd = "mathbf" if _is_bold(weight) else "mathrm"
+    body = "".join("_{%s}" % t if t.isdigit() else t for t in _formula_tokens(formula))
+    return r"$\%s{%s}$" % (cmd, body)
 
 
 def _ring_ts(nr):
@@ -227,7 +261,8 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         Line width of the unit-cell wireframe; defaults to the style's value.
     label : str, optional
         Text drawn below the figure (e.g. a chemical formula). Pass ``"formula"``
-        for the structure's chemical formula. No label if ``None``.
+        for the structure's chemical formula, with the counts as subscripts. No
+        label if ``None``.
     label_size : float
         Label font size (default 13).
     label_weight : matplotlib font weight
@@ -309,9 +344,18 @@ def render(atoms, ax=None, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
     ax.patch.set_alpha(0.0)
 
     if label:
+        font = label_font or DEFAULT_LABEL_FONT
         if label == "formula":
-            label = atoms.get_chemical_formula()
-        ax.text(0.5, -0.02, label, transform=ax.transAxes, ha="center", va="top",
-                fontsize=label_size, fontweight=label_weight, rotation=label_rotation,
-                fontfamily=label_font or DEFAULT_LABEL_FONT)
+            formula = atoms.get_chemical_formula()
+            if label_rotation == 0:                      # composed subscripts, any font
+                _add_formula_label(ax, formula, 0.5, -0.02, label_size,
+                                   label_weight, font)
+            else:                                        # rotated: mathtext subscripts
+                ax.text(0.5, -0.02, _mathtext_formula(formula, label_weight),
+                        transform=ax.transAxes, ha="center", va="top",
+                        fontsize=label_size, rotation=label_rotation)
+        else:
+            ax.text(0.5, -0.02, label, transform=ax.transAxes, ha="center", va="top",
+                    fontsize=label_size, fontweight=label_weight,
+                    rotation=label_rotation, fontfamily=font)
     return ax

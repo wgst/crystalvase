@@ -36,7 +36,8 @@ cv.grid([(wb, dict(radius_scale=s, label=f"{s} ({cv.RADIUS_SCALES[s]})"))
 crystals = [read(f) for f in sorted(glob.glob(f"{HERE}/demo/*.xyz"))]
 preview = [
     (wb, dict(style="realistic", palette="jmol", radius_scale="xlarge", rotation=WROT)),
-    (crystals[0], dict(style="clean", cell_color="0.55", cell_width=0.6)),   # B2I6
+    (crystals[0], dict(style="clean", cell_color="0.55",
+                       cell_width=cv.DEFAULT_STYLE["cell_lw"])),             # B2I6
     (crystals[1], dict(style="ase", cell_color="black", cell_width=1.1)),    # Bi10Cl24Ga6
     (crystals[2], dict(style="cartoon-soft")),                              # Na2O24P6Sn4
 ]

@@ -46,7 +46,7 @@ DEFAULT_STYLE = dict(
     spec=(1.0, 1.0, 1.0), hx=-0.28, hy=0.30, depth_lo=0.55, depth_desat=0.0,
     sat=1.0, bright=1.0, shadow_tint=(1.0, 1.0, 1.0), shadow_hue=0.0,
     posterize=None, flat=False, outline=None, outline_color=None, outline_lw=0.4,
-    cell_color="0.55", cell_lw=0.6,
+    cell_color="0.55", cell_lw=0.45,
 )
 
 
