@@ -14,7 +14,13 @@ matplotlib.
 ## Install
 
 ```bash
-pip install -e .              # everything included; deps: ase, numpy, matplotlib, pillow
+pip install crystalvase
+```
+
+Or from a clone, for development:
+
+```bash
+pip install -e .              # deps: ase, numpy, matplotlib, pillow
 ```
 
 ## Use
