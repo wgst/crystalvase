@@ -13,8 +13,9 @@ import crystalvase as cv
 
 
 def test_palettes_and_styles_present():
-    assert set(cv.PALETTES) == {"jmol", "vesta", "vmd"}
-    assert {"cartoon", "realistic", "ase"} <= set(cv.STYLES)
+    assert {"jmol", "vesta", "vmd"} <= set(cv.PALETTES)          # base palettes
+    assert {"blossom", "emerald", "midnight"} <= set(cv.PALETTES)  # tone schemes
+    assert {"clean", "cartoon", "realistic", "ase"} <= set(cv.STYLES)
     for arr in cv.PALETTES.values():
         assert arr.ndim == 2 and arr.shape[1] == 3
 
