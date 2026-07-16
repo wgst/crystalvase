@@ -15,7 +15,7 @@ Atoms are drawn as lit spheres (an offset radial gradient made of nested filled
 circles), so vector output (PDF/SVG) stays crisp at any zoom. See :func:`render`
 and :func:`write` for options; :data:`PALETTES` and :data:`STYLES` list the choices.
 """
-__version__ = "0.1.0"
+__version__ = "0.2.0"      # the single source of truth; pyproject reads this
 
 from . import demo
 from .render import (render, DEFAULT_ROTATION, DEFAULT_PALETTE, DEFAULT_STYLE_NAME,

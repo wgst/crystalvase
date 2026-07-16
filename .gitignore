@@ -21,3 +21,6 @@ env/
 # ...but keep the committed reference galleries
 !docs/*.png
 !docs/*.pdf
+
+# macOS
+.DS_Store

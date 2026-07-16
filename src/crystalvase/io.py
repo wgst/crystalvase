@@ -8,8 +8,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .render import (render, DEFAULT_ROTATION, DEFAULT_RADIUS_SCALE,
-                     DEFAULT_PALETTE, DEFAULT_STYLE_NAME)
+from .render import render
 
 VECTOR_EXTS = {".pdf", ".svg", ".eps", ".ps"}
 RASTER_EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
@@ -41,12 +40,8 @@ def _savefig(fig, path, dpi=200, transparent=True, background=None):
     return path
 
 
-def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE,
-          style=DEFAULT_STYLE_NAME, radius_scale=DEFAULT_RADIUS_SCALE, show_cell=True,
-          reduce_cell=False, rings=None, cell_color=None, cell_width=None,
-          label=None, label_size=13, label_weight="extra bold", label_rotation=0,
-          label_font=None, figsize=4.0, dpi=200, transparent=True, background=None,
-          title=None):
+def write(atoms, filename, *, figsize=4.0, dpi=200, transparent=True,
+          background=None, title=None, **render_kwargs):
     """Render ``atoms`` and save to ``filename`` (format from the extension).
 
     Parameters
@@ -54,12 +49,6 @@ def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
     atoms : ase.Atoms
     filename : str
         Output path; extension selects the format (see module docstring).
-    rotation, palette, style, radius_scale, show_cell, reduce_cell, rings, cell_color,
-    cell_width, label, label_size, label_weight, label_rotation, label_font
-        Passed through to :func:`crystalvase.render` (``rings``: fewer gradient
-        rings -> much smaller vector files; ``cell_color``/``cell_width``: unit-cell
-        wireframe appearance; ``label`` below the figure — ``"formula"`` for the
-        chemical formula — with ``label_size``/``label_weight``/``label_rotation``/``label_font``).
     figsize : float or (w, h)
         Figure size in inches (a scalar means a square).
     dpi : int
@@ -72,6 +61,11 @@ def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
         Forced to white for opaque formats if not given.
     title : str, optional
         Small title drawn above the figure.
+    **render_kwargs
+        Everything else is forwarded to :func:`crystalvase.render` — e.g.
+        ``rotation``, ``palette``, ``style``, ``radius_scale``, ``show_cell``,
+        ``reduce_cell``, ``cell_color``, ``bonds``, ``supercell``, ``show_images``,
+        ``polyhedra``, ``label``, …
 
     Returns
     -------
@@ -83,11 +77,7 @@ def write(atoms, filename, *, rotation=DEFAULT_ROTATION, palette=DEFAULT_PALETTE
 
     fig, ax = plt.subplots(figsize=figsize)
     try:
-        render(atoms, ax, rotation=rotation, palette=palette, style=style,
-               radius_scale=radius_scale, show_cell=show_cell, reduce_cell=reduce_cell,
-               rings=rings, cell_color=cell_color, cell_width=cell_width,
-               label=label, label_size=label_size, label_weight=label_weight,
-               label_rotation=label_rotation, label_font=label_font)
+        render(atoms, ax, **render_kwargs)
         if title:
             ax.set_title(title, fontsize=9)
         _savefig(fig, filename, dpi=dpi, transparent=transparent, background=background)
