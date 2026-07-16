@@ -58,3 +58,45 @@ def test_unknown_names_raise():
         cv.get_palette("nope")
     with pytest.raises(ValueError):
         cv.get_style("nope")
+
+
+def test_bonds_vector(tmp_path):
+    out = tmp_path / "eth.pdf"
+    cv.write(molecule("CH3CH2OH"), str(out), bonds=True, show_cell=False)
+    data = out.read_bytes()
+    assert data[:4] == b"%PDF"
+    assert data.count(b"/Subtype /Image") == 0     # bonds stay vector too
+
+
+def test_formula_labels(tmp_path):
+    """`formula` counts the drawn supercell; `reduced` gives the empirical unit.
+    Periodic images are duplicates and must never inflate either."""
+    from ase import Atoms
+    a = 3.905
+    sto = Atoms("SrTiO3", cell=[a, a, a], pbc=True,
+                scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5),
+                                  (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5)])
+    for lab in ("formula", "reduced"):
+        for images in (False, True):
+            ax = cv.render(sto, label=lab, supercell=(2, 2, 2), show_images=images)
+            texts = [t.get_text() for t in ax.figure.findobj(plt.Text)]
+            joined = "".join(texts)
+            if lab == "formula":
+                assert "54" not in joined            # 24 O, not the image-inflated count
+                assert "24" in joined
+            else:
+                assert "Sr" in joined and "Ti" in joined and "3" in joined
+                assert "24" not in joined and "8" not in joined   # reduced to SrTiO3
+            plt.close(ax.figure)
+
+
+def test_supercell_images_polyhedra():
+    nacl = bulk("NaCl", "rocksalt", a=5.64)
+    for ax in (
+        cv.render(nacl, supercell=2),                       # int form
+        cv.render(nacl, supercell=(2, 2, 1)),               # tuple form
+        cv.render(nacl, show_images=True, bonds=True),      # boundary completion + bonds
+        cv.render(nacl, supercell=(2, 2, 2), polyhedra="Na", bonds=True),
+    ):
+        assert ax is not None
+        plt.close(ax.figure)

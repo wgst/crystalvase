@@ -44,6 +44,9 @@ def build_parser():
     p.add_argument("--radius-scale", default=DEFAULT_RADIUS_SCALE,
                    help="atom size: small | medium | large | xlarge, or a number "
                         f"(fraction of covalent radius; default: {DEFAULT_RADIUS_SCALE})")
+    p.add_argument("--atom-radii", default=None,
+                   help="per-element radii in Angstrom, e.g. 'Sr:1.1,O:0.3' (other "
+                        "elements keep --radius-scale)")
     p.add_argument("--no-cell", action="store_true", help="do not draw the unit cell")
     p.add_argument("--cell-color", default=None,
                    help="unit-cell colour, e.g. black | lightgray | dimgray | '0.3' | "
@@ -52,6 +55,23 @@ def build_parser():
                    help="unit-cell line width (default: from the style)")
     p.add_argument("--reduce-cell", action="store_true",
                    help="Niggli-reduce the cell so oblique boxes aren't sheared")
+    p.add_argument("--supercell", default=None,
+                   help="replicate a periodic cell, e.g. '2' or '2,2,1'")
+    p.add_argument("--show-images", action="store_true",
+                   help="complete the cell with periodic images of boundary atoms")
+    p.add_argument("--bonds", action="store_true",
+                   help="draw bonds from covalent-radius cutoffs")
+    p.add_argument("--bond-scale", type=float, default=1.2,
+                   help="covalent-radius multiplier for the bond cutoff (default 1.2)")
+    p.add_argument("--bond-radius", type=float, default=0.15,
+                   help="bond half-thickness in Angstrom (default 0.15)")
+    p.add_argument("--polyhedra", default=None,
+                   help="element(s) to draw coordination polyhedra around, e.g. 'Si' or 'Si,Ti'")
+    p.add_argument("--polyhedra-scale", type=float, default=1.2,
+                   help="covalent-radius multiplier for polyhedra vertices (default 1.2)")
+    p.add_argument("--polyhedra-alpha", type=float, default=0.6,
+                   help="polyhedron opacity; 1.0 = solid hull hiding its centre "
+                        "(default 0.6)")
     p.add_argument("--rings", type=int, default=None,
                    help="gradient rings per sphere (default 220; fewer -> smaller "
                         "vector files)")
@@ -90,6 +110,19 @@ def main(argv=None):
     if not args.input or not args.output:
         parser.error("the following arguments are required: input, output")
 
+    supercell = None
+    if args.supercell:
+        supercell = [int(v) for v in args.supercell.replace("x", ",").split(",")]
+        supercell = supercell[0] if len(supercell) == 1 else supercell
+    polyhedra = args.polyhedra.split(",") if args.polyhedra else None
+    atom_radii = None
+    if args.atom_radii:                          # "Sr:1.1,O:0.3" -> {"Sr": 1.1, ...}
+        try:
+            atom_radii = {k.strip(): float(v) for k, v in
+                          (tok.split(":") for tok in args.atom_radii.split(","))}
+        except ValueError:
+            parser.error("--atom-radii must look like 'Sr:1.1,O:0.3'")
+
     frames = read(args.input, index=args.index)
     if not isinstance(frames, list):
         frames = [frames]
@@ -99,9 +132,14 @@ def main(argv=None):
         out = _numbered(args.output, n) if multi else args.output
         title = atoms.get_chemical_formula() if args.title == "formula" else args.title
         write(atoms, out, rotation=args.rotation, palette=args.palette, style=args.style,
-              radius_scale=args.radius_scale, show_cell=not args.no_cell,
+              radius_scale=args.radius_scale, atom_radii=atom_radii,
+              show_cell=not args.no_cell,
               reduce_cell=args.reduce_cell, rings=args.rings, cell_color=args.cell_color,
-              cell_width=args.cell_width, label=args.label, label_size=args.label_size,
+              cell_width=args.cell_width, supercell=supercell, show_images=args.show_images,
+              bonds=args.bonds, bond_scale=args.bond_scale, bond_radius=args.bond_radius,
+              polyhedra=polyhedra, polyhedra_scale=args.polyhedra_scale,
+              polyhedra_alpha=args.polyhedra_alpha,
+              label=args.label, label_size=args.label_size,
               label_weight=args.label_weight, label_rotation=args.label_rotation,
               label_font=args.label_font, figsize=args.figsize, dpi=args.dpi,
               background=args.background, title=title)

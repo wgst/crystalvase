@@ -12,6 +12,11 @@ Main styles, each with variants (pick with ``style="<name>"``):
                   Variants: ``realistic-warm``, ``realistic-cool``.
 - ``ase``       — the classic flat ASE look (outlined discs), vector and
                   depth-dimmed. Variant: ``ase-shaded``.
+- hyperrealistic studio-render materials (per-normal env shader: one shaped key
+  highlight + sky/floor reflections + fresnel rim on a deep-shadowed body):
+  ``studio`` (glossy plastic, wide-bar light), ``clay`` (soft matte, oval),
+  ``pearl`` (high-gloss, big soft light), ``metallic`` (satin metal, streak),
+  ``gloss`` (lacquered, small dot), ``velvet`` (no highlight, rim-lit).
 
 All styles shade atoms by depth (position) so overlapping structure stays clear.
 Build your own with :func:`make_style`, overriding keys of :data:`DEFAULT_STYLE`.
@@ -40,6 +45,13 @@ Build your own with :func:`make_style`, overriding keys of :data:`DEFAULT_STYLE`
 #   outline_lw   rim line width in points
 #   cell_color   colour of the unit-cell wireframe
 #   cell_lw      line width of the unit-cell wireframe
+#   --- complex lighting (0 = off; the hyperrealistic styles turn these up) ---
+#   rim_amt      fresnel edge-light strength: the limb lifts towards ``rim_color``
+#   rim_start    where the rim glow begins (fraction of the radius; higher = thinner)
+#   rim_color    RGB of the rim/environment light (None -> the specular colour)
+#   fill_amt     strength of a soft secondary "bounce" glow opposite the key light
+#   fill_hx, fill_hy  bounce direction (fraction of radius; default lower-right)
+#   fill_color   RGB of the bounce (None -> a lightened tint of the atom's colour)
 DEFAULT_STYLE = dict(
     edge_dark=0.70, body0=0.80, body_gain=0.34, body_end=0.80,
     soft_amt=0.40, soft_start=0.42, hot_amt=0.88, hot_start=0.88,
@@ -47,6 +59,22 @@ DEFAULT_STYLE = dict(
     sat=1.0, bright=1.0, shadow_tint=(1.0, 1.0, 1.0), shadow_hue=0.0,
     posterize=None, flat=False, outline=None, outline_color=None, outline_lw=0.4,
     cell_color="0.55", cell_lw=0.45,
+    rim_amt=0.0, rim_start=0.66, rim_color=None,
+    fill_amt=0.0, fill_hx=0.26, fill_hy=-0.30, fill_color=None,
+    # env: the per-surface-normal "studio" shader (complex, multi-zone light play)
+    #   env          True -> shade per normal instead of per ring (hyperrealistic)
+    #   env_amb      ambient floor of the diffuse body (lower = deeper shadows)
+    #   env_contrast diffuse falloff power (higher = darker shadows, punchier body)
+    #   env_sky      strength of the upper sky reflection
+    #   env_floor    strength of the lower floor-bounce reflection
+    #   env_soft_w   half-width of the single softbox highlight (fraction of radius)
+    #   env_soft_h   half-height of the softbox (w != h -> a rectangular/streak shape)
+    #   env_soft_round superellipse power: 2 = oval, 3-4 = rounded rectangle/softbox
+    env=False, env_amb=0.18, env_contrast=1.4, env_sky=0.0, env_floor=0.0,
+    env_soft_w=0.38, env_soft_h=0.48, env_soft_round=2.4,
+    #   bond_tone  None -> bonds coloured per atom (VESTA-like); or an RGB for a
+    #   single neutral rod material (the model-kit look of studio renders)
+    bond_tone=None,
 )
 
 
@@ -98,6 +126,53 @@ STYLES = {
     "realistic-cool": make_style(**{**_REAL, "spec": (0.85, 0.93, 1.0),      # cool daylight
                                     "shadow_tint": (0.93, 0.93, 1.0),
                                     "bright": 0.99}),
+    # -- hyperrealistic: the per-normal environment shader (env=True) reflects a small
+    #    studio -- broad softbox + tight glint + sky + floor-bounce + fresnel rim -- so
+    #    the atoms show complex, multi-zone light play. Look good on NO background. --
+    # all four share the user-picked body: deep "dramatic" shadows (env_contrast) with
+    # a bright lit side and a hot (0.72) single shaped highlight; shapes differ per style
+    "studio":         make_style(bond_tone=(0.80, 0.81, 0.84), env=True, edge_dark=0.26, body0=0.34, body_gain=0.80,
+                                 env_amb=0.03, env_contrast=2.3, soft_amt=0.72,
+                                 env_soft_w=0.56, env_soft_h=0.30, env_soft_round=3.0,
+                                 env_sky=0.32, env_floor=0.42, rim_amt=0.46,
+                                 spec=(1.0, 0.99, 0.97), shadow_tint=(0.88, 0.90, 1.02),
+                                 hx=-0.30, hy=0.34, depth_lo=0.74, depth_desat=0.06,
+                                 sat=1.10, bright=1.02),         # glossy plastic, wide-bar light
+    "clay":           make_style(bond_tone=(0.85, 0.85, 0.87), env=True, edge_dark=0.50, body0=0.52, body_gain=0.52,
+                                 env_amb=0.16, env_contrast=1.7, soft_amt=0.34,
+                                 env_soft_w=0.50, env_soft_h=0.54, env_soft_round=2.0,
+                                 env_sky=0.10, env_floor=0.30, rim_amt=0.14,
+                                 spec=(1.0, 1.0, 1.0), shadow_tint=(0.90, 0.92, 1.03),
+                                 hx=-0.24, hy=0.28, depth_lo=0.72, depth_desat=0.18,
+                                 sat=0.90, bright=1.06),         # soft matte clay, oval light
+    "pearl":          make_style(bond_tone=(0.86, 0.87, 0.90), env=True, edge_dark=0.24, body0=0.34, body_gain=0.80,
+                                 env_amb=0.03, env_contrast=2.3, soft_amt=0.72,
+                                 env_soft_w=0.52, env_soft_h=0.58, env_soft_round=2.1,
+                                 env_sky=0.40, env_floor=0.48, rim_amt=0.54,
+                                 spec=(1.0, 1.0, 1.0), shadow_tint=(0.86, 0.88, 1.02),
+                                 hx=-0.28, hy=0.36, depth_lo=0.62, depth_desat=0.10,
+                                 sat=1.04, bright=1.02),         # pearlescent, big soft light
+    "metallic":       make_style(bond_tone=(0.78, 0.81, 0.87), env=True, edge_dark=0.30, body0=0.32, body_gain=0.80,
+                                 env_amb=0.02, env_contrast=2.3, soft_amt=0.68,
+                                 env_soft_w=0.24, env_soft_h=0.60, env_soft_round=2.4,
+                                 env_sky=0.50, env_floor=0.50, rim_amt=0.54,
+                                 rim_color=(0.90, 0.93, 1.0), spec=(0.95, 0.97, 1.0),
+                                 shadow_tint=(0.80, 0.86, 1.06), hx=-0.28, hy=0.34,
+                                 depth_lo=0.70, depth_desat=0.08,
+                                 sat=0.95, bright=1.03),         # satin metal, streak light
+    "gloss":          make_style(bond_tone=(0.80, 0.81, 0.84), env=True, edge_dark=0.26, body0=0.34, body_gain=0.80,
+                                 env_amb=0.03, env_contrast=2.3, soft_amt=0.72,
+                                 env_soft_w=0.20, env_soft_h=0.24, env_soft_round=2.0,
+                                 env_sky=0.32, env_floor=0.42, rim_amt=0.46,
+                                 spec=(1.0, 0.99, 0.97), shadow_tint=(0.88, 0.90, 1.02),
+                                 hx=-0.30, hy=0.34, depth_lo=0.74, depth_desat=0.06,
+                                 sat=1.10, bright=1.02),         # lacquered, small dot light
+    "velvet":         make_style(bond_tone=(0.78, 0.79, 0.82), env=True, edge_dark=0.30, body0=0.36, body_gain=0.78,
+                                 env_amb=0.04, env_contrast=2.1, soft_amt=0.0,
+                                 env_sky=0.10, env_floor=0.30, rim_amt=0.42,
+                                 spec=(1.0, 1.0, 1.0), shadow_tint=(0.87, 0.89, 1.03),
+                                 hx=-0.28, hy=0.32, depth_lo=0.72, depth_desat=0.10,
+                                 sat=1.06, bright=1.02),         # velvet: no highlight, rim-lit
     # -- ase: the classic flat ASE look, vector + depth-dimmed --
     "ase":            make_style(flat=True, body0=1.0, outline_color=(0, 0, 0),
                                  outline_lw=1.0, depth_lo=0.55),
